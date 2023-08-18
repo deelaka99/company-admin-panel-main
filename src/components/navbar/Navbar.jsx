@@ -88,10 +88,10 @@ const Navbar = () => {
             </button>
           </div>
           {isOpen && (
-            <div className="bg-white absolute top-20 flex flex-col items-start rounded-lg p-5 w-full drop-shadow-xl">
+            <div className="bg-white absolute top-20 flex flex-col items-start rounded-lg p-5 w-full drop-shadow-xl dark:bg-dark-ternary">
               <div className="flex flex-col">
                 <div className="h-1/2 w-full ">
-                  <a href="#" className="">
+                  <a href="#" className="dark:text-white">
                     Edit Profile
                   </a>
                 </div>
