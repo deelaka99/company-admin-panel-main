@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = () => {
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <div className=" w-full h-full flex flex-col items-center justify-center dark:text-white">
       <div className="h-2/6 w-full flex items-center justify-center">
@@ -22,7 +24,7 @@ const Profile = () => {
                 <h1 className="text-4xl font-inter font-medium pr-5">
                   Linada Annabel
                 </h1>
-                <button>
+                <button onClick={() => setShowModal(true)}>
                   <FontAwesomeIcon icon={faPencil} />
                 </button>
               </div>
@@ -40,7 +42,7 @@ const Profile = () => {
             </div>
             <div className="h-full w-6/12"></div>
             <div className="h-full w-1/12">
-              <button>
+              <button onClick={() => setShowModal(true)}>
                 <FontAwesomeIcon icon={faPencil} />
               </button>
             </div>
@@ -61,6 +63,102 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      {/**modal */}
+      {showModal ? (
+        <>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-primary-blue dark:text-white">
+            <div className="relative w-auto my-6 mx-auto max-w-3xl">
+              {/*content*/}
+              <div className="p-5 border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-ternary-blue dark:bg-dark-secondary dark:border-2 dark:border-dark-ternary outline-none focus:outline-none">
+                {/*header*/}
+                <div className="flex items-start justify-between p-2 rounded-t">
+                  <h3 className="text-3xl font-semibold">Edit Profile</h3>
+                  <button
+                    className="p-1 ml-auto  border-0 text-primary-blue text-3xl font-semibold active:text-black"
+                    onClick={() => setShowModal(false)}
+                  >
+                    <span className=" text-primary-blue drop-shadow-lg shadow-black h-6 w-6 text-4xl block dark:text-white flex items-center justify-center">
+                      ×
+                    </span>
+                  </button>
+                </div>
+                {/*body*/}
+                <div className="relative p-6 flex flex-col">
+                  <form>
+                    <div className="h-1/5 w-full flex flex-col">
+                      <div className="">
+                        <p className="font-semibold">Name :</p>
+                      </div>
+                      <div className="pt-2 pb-2">
+                        <input
+                          type="text"
+                          placeholder="Existing name"
+                          className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
+                        />
+                      </div>
+                    </div>
+                    <div className="h-1/5 w-full flex flex-col">
+                      <div>
+                        <p className="font-semibold">Email :</p>
+                      </div>
+                      <div className="pt-2 pb-2">
+                        <input
+                          type="text"
+                          placeholder="Existing email"
+                          className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
+                        />
+                      </div>
+                    </div>
+                    <div className="h-1/5 w-full flex flex-col">
+                      <div>
+                        <p className="font-semibold">Phone :</p>
+                      </div>
+                      <div className="pt-2 pb-2">
+                        <input
+                          type="text"
+                          placeholder="Existing phone"
+                          className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
+                        />
+                      </div>
+                    </div>
+                    <div className="h-1/5 w-full flex flex-col">
+                      <div>
+                        <p className="font-semibold">Address :</p>
+                      </div>
+                      <div className="pt-2 pb-2">
+                        <input
+                          type="text"
+                          placeholder="Existing address"
+                          className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
+                        />
+                      </div>
+                    </div>
+                    <div className="h-1/5 w-full flex flex-col">
+                      <div>
+                        <p className="font-semibold">Profile picture :</p>
+                      </div>
+                      <div className="pt-2 pb-2">
+                        <input type="file" className=""/>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                {/*footer*/}
+                <div className="flex items-center justify-center p-1 rounded-b">
+                  <button
+                    className="bg-primary-blue text-white active:bg-black font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Update Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+        </>
+      ) : null}
     </div>
   );
 };
