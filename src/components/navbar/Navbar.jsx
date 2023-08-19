@@ -18,22 +18,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
-  //   useEffect(() => {
-  //     if (!user) return navigate("/");
-  //
-  //     const unsubscribe = auth.onAuthStateChanged((admin) => {
-  //       if (admin) {
-  //         setUser(admin);
-  //       } else {
-  //         setUser(null);
-  //       }
-  //     });
-  //
-  //     return () => {
-  //       unsubscribe(); // Unsubscribe when component unmounts
-  //     };
-  //   }, [user]);
-
   return (
     <>
       {/**Search bar */}

@@ -13,24 +13,30 @@ import Help from "./Help";
 function SettingContainer() {
   return (
     <>
-      <div className="w-11/12 h-5/6 flex bg-ternary-blue drop-shadow-2xl rounded-xl dark:bg-dark-ternary">
+      <div className="w-4/6 h-5/6 flex bg-ternary-blue drop-shadow-2xl rounded-xl dark:bg-dark-ternary">
         <div className="h-full w-1/4 flex flex-col rounded-lg">
           <div className="h-2/6 w-ful"></div>
           <div className="h-4/6 w-full flex flex-col items-start justify-center pt-8 pb-8 pl-3 pr-3 text-primary-blue dark:text-silver">
             <button className="h-1/3 w-full font-semibold text-xl rounded-lg hover:border-2 hover:border-primary-blue hover:bg-secondary-blue active:text-white dark:hover:bg-dark-primary dark:hover:border-silver dark:active:text-dark-ternary">
-              <FontAwesomeIcon icon={faBell} /> &nbsp;Notification
+              <div className="h-full w-full p-3 flex items-center">
+                <FontAwesomeIcon icon={faBell} /> &nbsp;Notification
+              </div>
             </button>
             <button className="h-1/3 w-full font-semibold text-xl rounded-lg hover:border-2 hover:border-primary-blue hover:bg-secondary-blue active:text-white dark:hover:bg-dark-primary dark:hover:border-silver dark:active:text-dark-ternary">
-              <FontAwesomeIcon icon={faShieldHalved} /> &nbsp;Security
+              <div className="h-full w-full p-3 flex items-center">
+                <FontAwesomeIcon icon={faShieldHalved} /> &nbsp;Security
+              </div>
             </button>
             <button className="h-1/3 w-full font-semibold text-xl rounded-lg  hover:border-2 hover:border-primary-blue hover:bg-secondary-blue active:text-white dark:hover:bg-dark-primary dark:hover:border-silver dark:active:text-dark-ternary">
-              <FontAwesomeIcon icon={faCircleQuestion} /> &nbsp;Help
+              <div className="h-full w-full p-3 flex items-center">
+                <FontAwesomeIcon icon={faCircleQuestion} /> &nbsp;Help
+              </div>
             </button>
           </div>
           <div className="h-2/6 w-ful"></div>
         </div>
-        <div className="h-full w-3/4 bg-primary-blue rounded-xl dark:bg-dark-primary">
-            <Notification/>
+        <div className="h-full w-3/4 bg-primary-blue rounded-br-xl rounded-tr-xl dark:bg-dark-primary flex justify-center items-center">
+          <Security />
         </div>
       </div>
     </>
