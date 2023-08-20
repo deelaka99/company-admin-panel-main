@@ -1,6 +1,17 @@
-import React from "react";
+import React, {useState} from "react";
+import database from "../../firebase";
 
 function AddNewLab() {
+  const [userName, setUserName] = useState();
+  const [LabName, setLabName] = useState();
+  const [district, setDistrict] = useState();
+  const [telephone, setTelephone] = useState();
+  const [paymentDate, setPaymentDate] = useState();
+  const [password, setPassword] = useState();
+  const [address, setAddress] = useState();
+  const [province, setProvince] = useState();
+  const [email, setEmail] = useState();
+  const [amount, setAmount] = useState();
   return (
     <div className="flex flex-col w-full h-full ">
       
