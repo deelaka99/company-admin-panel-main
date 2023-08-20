@@ -35,6 +35,21 @@ function AddNewLab() {
     //validation checks
     let isValid = true;
 
+    //password validation things
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-="']/.test(
+      password
+    );
+    const isLengthValid = password.length >= 8; // minimum 8 characters
+
+    //email validation things
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+    //amount validation things
+    const amountPattern = /^\d+(\.\d{1,2})?$/;
+
     if (!userName) {
       setUserNameError("User name is required");
       isValid = false;
@@ -58,12 +73,26 @@ function AddNewLab() {
         "Invalid telephone number. Please enter a 10-digit number."
       );
       isValid = false;
-    } else {
-      setTelephoneError("");
     }
 
     if (!paymentDate) {
       setPaymentDateError("Payment date is required");
+      isValid = false;
+    }
+
+    if (!password) {
+      setPasswordError("Password is required");
+      isValid = false;
+    } else if (
+      !hasUppercase ||
+      !hasLowercase ||
+      !hasNumber ||
+      !hasSpecialChar ||
+      !isLengthValid
+    ) {
+      setPasswordError(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long."
+      );
       isValid = false;
     }
 
@@ -80,12 +109,22 @@ function AddNewLab() {
     if (!email) {
       setEmailError("Email is required");
       isValid = false;
-    }
+    } else if (!emailPattern.test(email)) {
+      setEmailError(
+        "Invalid email format. Please enter a valid email address."
+      );
+      isValid = false;
+    } 
 
     if (!amount) {
       setAmountError("Amount is required");
       isValid = false;
-    }
+    }else if (!amountPattern.test(amount)) {
+      setAmountError(
+        "Invalid amount format. Please enter a valid amount."
+      );
+      isValid = false;
+    } 
 
     if (!isValid) {
       setShowAddedUnsuccessModal(true);
@@ -138,18 +177,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter user name"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${userNameError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={userName}
                     onChange={(e) => {
                       setUserName(e.target.value);
                       setUserNameError(""); // Clear error when the user types
                     }}
                   />
-                  {userNameError && (
-                    <p className="h-1/6 pt-1 text-xs text-center text-red">
-                      {userNameError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -158,18 +192,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter Lab name"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${labNameError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={LabName}
                     onChange={(e) => {
                       setLabName(e.target.value);
                       setLabNameError("");
                     }}
                   />
-                  {labNameError && (
-                    <p className="h-1/6 pt-1 text-xs text-center text-red">
-                      {labNameError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -178,18 +207,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter district"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${districtError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={district}
                     onChange={(e) => {
                       setDistrict(e.target.value);
                       setDistrictError("");
                     }}
                   />
-                  {districtError && (
-                    <p className="h-1/6 pt-1 text-xs text-center text-red">
-                      {districtError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -198,18 +222,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter telephone number"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${telephoneError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={telephone}
                     onChange={(e) => {
                       setTelephone(e.target.value);
                       setTelephoneError("");
                     }}
                   />
-                  {telephoneError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {telephoneError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -220,18 +239,13 @@ function AddNewLab() {
                   <input
                     type="date"
                     placeholder="Enter payment date as MM-dd-YYYY"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${paymentDateError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={paymentDate}
                     onChange={(e) => {
                       setPaymentDate(e.target.value);
                       setPaymentDateError("");
                     }}
                   />
-                  {paymentDateError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {paymentDateError}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -243,37 +257,13 @@ function AddNewLab() {
                   <input
                     type="password"
                     placeholder="Enter password"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${passwordError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      const hasUppercase = /[A-Z]/.test(value);
-                      const hasLowercase = /[a-z]/.test(value);
-                      const hasNumber = /\d/.test(value);
-                      const hasSpecialChar =
-                        /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-="']/.test(value);
-                      const isLengthValid = value.length >= 8; // minimum 8 characters
-
-                      if (
-                        !hasUppercase ||
-                        !hasLowercase ||
-                        !hasNumber ||
-                        !hasSpecialChar ||
-                        !isLengthValid
-                      ) {
-                        setPasswordError(
-                          "Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long."
-                        );
-                      } else {
-                        setPasswordError("");
-                      }
+                      setPasswordError("");
                     }}
                   />
-                  {passwordError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {passwordError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -282,18 +272,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter address"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${addressError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={address}
                     onChange={(e) => {
                       setAddress(e.target.value);
                       setAddressError("");
                     }}
                   />
-                  {addressError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {addressError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -302,18 +287,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter province"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${provinceError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={province}
                     onChange={(e) => {
                       setProvince(e.target.value);
                       setProvinceError("");
                     }}
                   />
-                  {provinceError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {provinceError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -322,27 +302,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter email"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${emailError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      const emailPattern =
-                        /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-                      if (!emailPattern.test(value)) {
-                        setEmailError(
-                          "Invalid email format. Please enter a valid email address."
-                        );
-                      } else {
-                        setEmailError("");
-                      }
+                      setEmailError("");
                     }}
                   />
-                  {emailError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {emailError}
-                    </p>
-                  )}
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
@@ -351,27 +317,13 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter amount"
-                    className="w-full h-5/6 rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg"
+                    className={`${amountError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={amount}
                     onChange={(e) => {
                       setAmount(e.target.value);
-                      // Validate amount (for example, non-negative numbers with up to 2 decimal places)
-                      const amountPattern = /^\d+(\.\d{1,2})?$/;
-
-                      if (!amountPattern.test(value)) {
-                        setAmountError(
-                          "Invalid amount format. Please enter a valid amount."
-                        );
-                      } else {
-                        setAmountError("");
-                      }
+                      setAmountError("");
                     }}
                   />
-                  {amountError && (
-                    <p className="h-1/6 text-xs text-center text-red">
-                      {amountError}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -398,9 +350,7 @@ function AddNewLab() {
               <div className="p-5 rounded-lg shadow-lg relative flex flex-col w-full bg-green border-2 outline-none focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-2 rounded-t">
-                  <h3 className="text-sm">
-                    Notification
-                  </h3>
+                  <h3 className="text-sm">Notification</h3>
                   <button
                     className="ml-auto bg-red rounded-sm border-0 text-lg font-semibold drop-shadow-md active:bg-white"
                     onClick={() => setShowAddedSuccessModal(false)}
@@ -413,7 +363,7 @@ function AddNewLab() {
                 {/*body*/}
                 <div className="relative p-6 flex flex-col">
                   <h3 className="text-2xl font-semibold">
-                    Lab Added Successfully !
+                    Lab Added Successfully ! 😎
                   </h3>
                 </div>
                 {/*footer*/}
@@ -433,9 +383,7 @@ function AddNewLab() {
               <div className="p-5 rounded-lg shadow-lg relative flex flex-col w-full bg-red border-2 outline-none focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-2 rounded-t">
-                  <h3 className="text-sm">
-                    Notification
-                  </h3>
+                  <h3 className="text-sm">Notification</h3>
                   <button
                     className="ml-auto bg-red-1 rounded-sm border-0 text-lg font-semibold drop-shadow-md active:bg-white"
                     onClick={() => setShowAddedUnsuccessModal(false)}
@@ -447,9 +395,59 @@ function AddNewLab() {
                 </div>
                 {/*body*/}
                 <div className="relative p-6 flex flex-col">
-                  <h3 className="text-2xl font-semibold">
-                    Lab Added Unsuccessfully !
+                  <h3 className="text-center text-2xl font-semibold">
+                    Lab Added Unsuccessfully ! 😢
                   </h3>
+                  {userNameError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {userNameError} -
+                    </p>
+                  )}
+                  {labNameError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {labNameError} -
+                    </p>
+                  )}
+                  {districtError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {districtError} -
+                    </p>
+                  )}
+                  {telephoneError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {telephoneError} -
+                    </p>
+                  )}
+                  {paymentDateError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {paymentDateError} -
+                    </p>
+                  )}
+                  {passwordError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {passwordError} -
+                    </p>
+                  )}
+                  {addressError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {addressError} -
+                    </p>
+                  )}
+                  {provinceError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {provinceError} -
+                    </p>
+                  )}
+                  {emailError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {emailError} -
+                    </p>
+                  )}
+                  {amountError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {amountError} -
+                    </p>
+                  )}
                 </div>
                 {/*footer*/}
               </div>
