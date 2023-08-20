@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {getAuth, signOut} from "firebase/auth";
+import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -23,7 +24,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
 
-//initialize firebase realtime database
-var database = firebase.database();
+// Initialize Firebase Realtime Database and get a reference to the service
+const db = getDatabase(app);
 
-export {app, auth, logout, database};
+export {app, auth, logout, db};
