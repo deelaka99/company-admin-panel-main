@@ -17,6 +17,7 @@ export default {
       'black': '#000000',
       'bermuda': '#78dcca',
       'red': '#FF2346',
+      'red-1':'#CB4006',
       'blue':'#140EDA',
       'yellow':'#EDE610',
       'green':'#3ED10A',

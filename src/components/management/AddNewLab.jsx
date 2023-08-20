@@ -4,6 +4,8 @@ import { uid } from "uid";
 import { set, ref } from "firebase/database";
 
 function AddNewLab() {
+  const [showAddedSuccessModal, setShowAddedSuccessModal] = useState(false);
+  const [showAddedUnsuccessModal, setShowAddedUnsuccessModal] = useState(false);
   //variable state
   const [userName, setUserName] = useState("");
   const [LabName, setLabName] = useState("");
@@ -86,6 +88,7 @@ function AddNewLab() {
     }
 
     if (!isValid) {
+      setShowAddedUnsuccessModal(true);
       return; //not proceed if there are validation errors
     } else {
       const uuid = uid();
@@ -112,6 +115,8 @@ function AddNewLab() {
       setProvince("");
       setEmail("");
       setAmount("");
+
+      setShowAddedSuccessModal(true);
     }
   };
   //read
@@ -248,7 +253,7 @@ function AddNewLab() {
                       const hasSpecialChar =
                         /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-="']/.test(value);
                       const isLengthValid = value.length >= 8; // minimum 8 characters
-                      
+
                       if (
                         !hasUppercase ||
                         !hasLowercase ||
@@ -384,6 +389,75 @@ function AddNewLab() {
           </div>
         </div>
       </div>
+      {/**Success notification modal */}
+      {showAddedSuccessModal ? (
+        <div>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-white">
+            <div className="relative w-auto my-6 mx-auto max-w-3xl">
+              {/*content*/}
+              <div className="p-5 rounded-lg shadow-lg relative flex flex-col w-full bg-green border-2 outline-none focus:outline-none">
+                {/*header*/}
+                <div className="flex items-start justify-between p-2 rounded-t">
+                  <h3 className="text-sm">
+                    Notification
+                  </h3>
+                  <button
+                    className="ml-auto bg-red rounded-sm border-0 text-lg font-semibold drop-shadow-md active:bg-white"
+                    onClick={() => setShowAddedSuccessModal(false)}
+                  >
+                    <span className=" drop-shadow-lg shadow-black h-6 w-6 text-white flex items-center justify-center active:text-dark-ternary">
+                      ×
+                    </span>
+                  </button>
+                </div>
+                {/*body*/}
+                <div className="relative p-6 flex flex-col">
+                  <h3 className="text-2xl font-semibold">
+                    Lab Added Successfully !
+                  </h3>
+                </div>
+                {/*footer*/}
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
+        </div>
+      ) : null}
+
+      {/**Unsuccess notification modal */}
+      {showAddedUnsuccessModal ? (
+        <div>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-white">
+            <div className="relative w-auto my-6 mx-auto max-w-3xl">
+              {/*content*/}
+              <div className="p-5 rounded-lg shadow-lg relative flex flex-col w-full bg-red border-2 outline-none focus:outline-none">
+                {/*header*/}
+                <div className="flex items-start justify-between p-2 rounded-t">
+                  <h3 className="text-sm">
+                    Notification
+                  </h3>
+                  <button
+                    className="ml-auto bg-red-1 rounded-sm border-0 text-lg font-semibold drop-shadow-md active:bg-white"
+                    onClick={() => setShowAddedUnsuccessModal(false)}
+                  >
+                    <span className=" drop-shadow-lg shadow-black h-6 w-6 text-white flex items-center justify-center active:text-dark-ternary">
+                      ×
+                    </span>
+                  </button>
+                </div>
+                {/*body*/}
+                <div className="relative p-6 flex flex-col">
+                  <h3 className="text-2xl font-semibold">
+                    Lab Added Unsuccessfully !
+                  </h3>
+                </div>
+                {/*footer*/}
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
+        </div>
+      ) : null}
     </div>
   );
 }
