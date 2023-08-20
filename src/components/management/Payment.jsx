@@ -1,73 +1,42 @@
 import React from "react";
-import applepay from "../../assets/images/apple-pay.png";
 import visa from "../../assets/images/visa.png";
 import mastercard from "../../assets/images/mastercard.png";
-import paypal from "../../assets/images/paypal.png";
 
 function Payment() {
   return (
     <div className="flex flex-col w-full h-full">
-      {/**Title */}
-      <div className="h-1/6 w-full flex items-center justify-center">
-        <h1 className="text-5xl font-medium p-2">Payment</h1>
-      </div>
-      <div className="h-5/6 w-full flex items-center justify-center">
-        <div className=" h-5/6 w-5/6 flex flex-col">
-          <div className="h-4/5 w-full flex flex-col">
-            <div className="w-full h-3/4 flex items-center justify-center">
-              <div className="w-5/6 h-5/6 rounded-xl bg-primary-blue">
-                <div className="w-full h-1/12 text-center text-white text-lg p-2">
-                  Make Payment
+      <div className="h-full w-full flex items-center justify-center">
+        <div className=" h-5/6 w-11/12">
+          <div className="h-full w-full flex flex-col overflow-hidden">
+            <div className="w-full h-2/4 flex items-center justify-center">
+              <div className="w-full h-5/6 rounded-md bg-primary-blue border-2 border-ternary-blue dark:bg-dark-primary dark:border-dark-ternary">
+                <div className="w-full h-1/12 text-center text-white p-2">
+                  <h1 className="text-lg font-medium">Make Payment</h1>
+                  <p className="text-sm font-inter">Choose payment method</p>
                 </div>
-                <div className="w-full h-11/12 flex  p-3">
-                  <div className="w-full h-1/4 ">
-                    <button className="hover:opacity-90">
-                      <div className="flex items-center justify-center w-11/12 h-11/12 bg-secondary-blue rounded-lg">
-                        <img src={visa} alt="visa" className="h-1/4 w-1/4" />
-                      </div>
+                <div className="w-full h-11/12 p-2 flex items-center justify-center">
+                  <div className="flex items-center justify-center pr-1">
+                    <button className="bg-ternary-blue rounded-md flex items-center justify-center hover:drop-shadow-lg active:bg-white dark:bg-dark-secondary dark:drop-shadow-lg dark:active:bg-dark-ternary">
+                      <img src={visa} alt="visa" className="h-1/5 w-1/5" />
                     </button>
                   </div>
-                  <div className="w-full h-1/4 ">
-                    <button className="hover:opacity-90">
-                      <div className="flex items-center justify-center w-11/12 h-11/12 bg-secondary-blue rounded-lg">
-                        <img
-                          src={mastercard}
-                          alt="mastercard"
-                          className="h-1/4 w-1/4"
-                        />
-                      </div>
-                    </button>
-                  </div>
-                  <div className="w-full h-1/4 ">
-                    <button className="hover:opacity-90">
-                      <div className="flex items-center justify-center w-11/12 h-11/12 bg-secondary-blue rounded-lg">
-                        <img
-                          src={paypal}
-                          alt="paypal"
-                          className="h-1/4 w-1/4"
-                        />
-                      </div>
-                    </button>
-                  </div>
-                  <div className="w-full h-1/4 ">
-                    <button className="hover:opacity-90">
-                      <div className="flex items-center justify-center w-11/12 h-11/12 bg-secondary-blue rounded-lg">
-                        <img
-                          src={applepay}
-                          alt="applepay"
-                          className="h-1/4 w-1/4"
-                        />
-                      </div>
+                  <div className="flex items-center justify-center pl-1">
+                    <button className="bg-ternary-blue rounded-md flex items-center justify-center hover:drop-shadow-lg active:bg-white dark:bg-dark-secondary dark:drop-shadow-lg dark:active:bg-dark-ternary">
+                      <img
+                        src={mastercard}
+                        alt="mastercard"
+                        className="h-1/5 w-1/5"
+                      />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="w-full h-1/4 flex items-center justify-center">
-              <div className="w-5/6 h-5/6">
-                <table className="bg-white dark:bg-dark-primary p-3 h-full w-full ">
-                  <thead>
-                    <tr className="bg-secondary-blue dark:bg-quternary-blue">
+            <div className="w-full h-2/4 pt-3 flex items-center justify-center overflow-y-auto">
+              <div className="w-full  rounded-md">
+                <table className="bg-ternary-blue dark:bg-dark-ternary p-3 h-full w-full ">
+                  <thead className="">
+                    <tr className="bg-secondary-blue dark:bg-dark-secondary">
                       <th className="p-1">Lab ID</th>
                       <th className="p-1">Name</th>
                       <th className="p-1">Address</th>
@@ -76,7 +45,7 @@ function Payment() {
                       <th className="p-1">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="overflow-x-auto">
+                  <tbody className="">
                     <tr className="text-center">
                       <td>001</td>
                       <td>A</td>

@@ -3,12 +3,9 @@ import React from "react";
 function AddNewLab() {
   return (
     <div className="flex flex-col w-full h-full ">
-      {/**Title */}
-      <div className="h-1/6 w-full flex items-center justify-center p-2">
-        <h1 className="text-5xl font-medium">Add New Lab</h1>
-      </div>
-      <div className="h-5/6 w-full flex items-center justify-center">
-        <div className="border-2 border-secondary-blue bg-primary-blue dark:bg-black h-5/6 w-5/6 rounded-3xl flex flex-col">
+      
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="border-2 border-secondary-blue bg-primary-blue dark:bg-dark-primary dark:border-dark-ternary h-5/6 w-11/12 rounded-3xl flex flex-col">
           <div className="h-4/5 w-full p-2 flex text-white">
             {/**first column */}
             <div className="w-1/2 h-full p-3">
@@ -122,8 +119,8 @@ function AddNewLab() {
           <div className="h-1/5 w-full flex">
             <div className="h-full w-3/5 p-2"></div>
             <div className="h-full w-2/5 p-5 flex items-center justify-center">
-              <button className="bg-secondary-blue hover:opacity-90 dark:bg-primary-blue h-full w-full rounded-md text-xl shadow-xl text-white">
-                Add
+              <button className="bg-secondary-blue hover:opacity-90 dark:bg-dark-ternary h-full w-full rounded-md text-xl shadow-xl text-white">
+                Add Lab
               </button>
             </div>
           </div>

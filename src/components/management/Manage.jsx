@@ -3,16 +3,13 @@ import React from "react";
 function Manage() {
   return (
     <div className="flex flex-col w-full h-full">
-      {/**Title */}
-      <div className="h-1/6 w-full flex items-center justify-center">
-        <h1 className="text-5xl font-medium p-20">Manage</h1>
-      </div>
-      <div className="h-5/6 w-full flex items-center justify-center">
-        <div className=" h-5/6 w-5/6 flex flex-col">
-          <div className="h-4/5 w-full flex items-center justify-center overflow-x-auto drop-shadow-2xl shadow-primary-blue">
-            <table className="bg-white dark:bg-dark-primary p-3 h-full w-full ">
+      
+      <div className="h-full w-full flex items-center justify-center">
+        <div className=" h-5/6 w-11/12">
+          <div className="h-full w-full flex items-center justify-center overflow-x-auto drop-shadow-2xl rounded-md overflow-y-auto">
+            <table className="bg-ternary-blue dark:bg-dark-ternary p-3 h-full w-full ">
               <thead>
-                <tr className="bg-secondary-blue dark:bg-quternary-blue">
+                <tr className="bg-secondary-blue dark:bg-dark-secondary">
                   <th className="p-1">Lab ID</th>
                   <th className="p-1">Name</th>
                   <th className="p-1">Address</th>

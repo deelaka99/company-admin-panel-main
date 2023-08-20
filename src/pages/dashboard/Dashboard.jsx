@@ -12,7 +12,7 @@ const Dashboard = () => {
             </div>
             <div className="h-5/6 w-full flex items-center justify-center">
               <div className="h-3/4 w-3/4 flex">
-                <div className="h-full w-2/5 text-white border-secondary-blue bg-primary-blue rounded-2xl border-4 dark:bg-black dark:opacity-80">
+                <div className="h-full w-2/5 text-white border-secondary-blue bg-primary-blue rounded-2xl border-2 dark:bg-dark-primary dark:border-dark-ternary dark:drop-shadow-2xl">
                   <div className="w-full h-1/6 flex items-center justify-center">
                     <p className="text-3xl">Registered Labs</p>
                   </div>
@@ -26,7 +26,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-full w-1/5"></div>
-                <div className="h-full w-2/5 text-white border-secondary-blue bg-primary-blue rounded-2xl border-4 dark:bg-black dark:opacity-80">
+                <div className="h-full w-2/5 text-white border-secondary-blue bg-primary-blue rounded-2xl border-2 dark:bg-dark-primary dark:border-dark-ternary dark:drop-shadow-2xl">
                   <div className="w-full h-1/6 flex items-center justify-center">
                     <p className="text-3xl">Blocked Labs</p>
                   </div>

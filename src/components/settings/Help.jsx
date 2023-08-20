@@ -17,7 +17,7 @@ function Help() {
       <div className="w-full h-4/5 p-2 flex text-primary-blue dark:text-white">
         <div className="w-1/2 h-full pl-2 pt-2 pb-2 flex flex-col ">
           <div className="h-1/2 w-full pl-2 pr-1 pt-3 pb-2 flex items-center justify-center ">
-            <div className="h-full w-full bg-secondary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
+            <div className="h-full w-full bg-ternary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
               <FontAwesomeIcon className="text-3xl" icon={faLocationDot} />
               <h1 className="font-inter text-lg font-semibold">
                 OUR MAIN OFFICE
@@ -26,7 +26,7 @@ function Help() {
             </div>
           </div>
           <div className="h-1/2 w-full pl-2 pr-1 pt-3 pb-2 flex items-center justify-center">
-            <div className="h-full w-full bg-secondary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
+            <div className="h-full w-full bg-ternary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
               <FontAwesomeIcon className="text-3xl" icon={faPhoneVolume} />
               <h1 className="font-inter text-lg font-semibold">PHONE NUMBER</h1>
               <p>011 3631245</p>
@@ -35,14 +35,14 @@ function Help() {
         </div>
         <div className="w-1/2 h-full pr-2 pt-2 pb-2 flex flex-col">
           <div className="h-1/2 w-full pl-1 pr-2 pt-3 pb-2 flex items-center justify-center">
-            <div className="h-full w-full bg-secondary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
+            <div className="h-full w-full bg-ternary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
               <FontAwesomeIcon className="text-3xl" icon={faEnvelope} />
               <h1 className="font-inter text-lg font-semibold">EMAIL</h1>
               <p>dtmsolutions@gmail.com</p>
             </div>
           </div>
           <div className="h-1/2 w-full pl-1 pr-2 pt-3 pb-2 flex items-center justify-center">
-            <div className="h-full w-full bg-secondary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
+            <div className="h-full w-full bg-ternary-blue p-3 rounded-lg drop-shadow-lg dark:bg-dark-ternary dark:shadow-md dark:shadow-dark-secondary text-center">
               <FontAwesomeIcon className="text-3xl" icon={faFax} />
               <h1 className="font-inter text-lg font-semibold">FAX</h1>
               <p>011 3631245</p>

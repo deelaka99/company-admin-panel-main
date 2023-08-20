@@ -25,7 +25,7 @@ function SettingContainer() {
             <button
               className={`${
                 activeComponent === "Notification"
-                  ? "border-2 border-primary-blue bg-secondary-blue dark:text-white dark:bg-dark-primary dark:border-silver"
+                  ? "hover:font-semibold border-2 border-primary-blue bg-secondary-blue dark:text-white dark:bg-dark-primary dark:border-silver"
                   : "text-primary-blue dark:text-silver"
               } h-1/3 w-full font-semibold text-xl rounded-lg hover:font-bold active:text-white  dark:hover:border-silver dark:active:text-dark-ternary`}
               onClick={() => handleButtonClick("Notification")}
@@ -37,7 +37,7 @@ function SettingContainer() {
             <button
               className={`${
                 activeComponent === "Security"
-                  ? "border-2 border-primary-blue bg-secondary-blue dark:text-white dark:bg-dark-primary dark:border-silver"
+                  ? "hover:font-semibold border-2 border-primary-blue bg-secondary-blue dark:text-white dark:bg-dark-primary dark:border-silver"
                   : "text-primary-blue dark:text-silver"
               } h-1/3 w-full font-semibold text-xl rounded-lg hover:font-bold active:text-white  dark:hover:border-silver dark:active:text-dark-ternary`}
               onClick={() => handleButtonClick("Security")}
@@ -49,7 +49,7 @@ function SettingContainer() {
             <button
               className={`${
                 activeComponent === "Help"
-                  ? "border-2 border-primary-blue bg-secondary-blue dark:text-white dark:bg-dark-primary dark:border-silver"
+                  ? "hover:font-semibold border-2 border-primary-blue bg-secondary-blue dark:text-white dark:bg-dark-primary dark:border-silver"
                   : "text-primary-blue dark:text-silver"
               } h-1/3 w-full font-semibold text-xl rounded-lg hover:font-bold active:text-white  dark:hover:border-silver dark:active:text-dark-ternary`}
               onClick={() => handleButtonClick("Help")}

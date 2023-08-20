@@ -9,13 +9,11 @@ import {
 
 import { auth } from "../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useNavigate } from "react-router-dom";
 import { logout } from "../../firebase";
 import Switcher from "../darkMode/Switcher";
 
 const Navbar = () => {
   const [user] = useAuthState(auth);
-  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -38,7 +36,7 @@ const Navbar = () => {
       {/**Dark mode & user */}
       <div className="h-full w-2/5 flex">
         {/**Dark mode button */}
-        <div className="h-full w-1/5 flex justify-center items-center">
+        <div className=" h-full w-1/5 flex justify-center items-center">
           <div className="bg-bermuda dark:bg-dark-secondary rounded-full h-1/2 w-1/2 flex items-center justify-center">
             <Switcher />
           </div>
@@ -72,13 +70,8 @@ const Navbar = () => {
             </button>
           </div>
           {isOpen && (
-            <div className="bg-white absolute top-20 flex flex-col items-start rounded-lg p-5 w-full drop-shadow-xl dark:bg-dark-ternary">
+            <div className="bg-white absolute top-20 flex flex-col items-start rounded-lg p-5 w-full drop-shadow-xl ">
               <div className="flex flex-col">
-                <div className="h-1/2 w-full ">
-                  <a href="#" className="dark:text-white">
-                    Edit Profile
-                  </a>
-                </div>
                 <div className="h-1/2 w-full ">
                   <button className="text-red" onClick={logout}>
                     Logout
