@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { React, useState} from "react";
+import bcrypt from "bcryptjs";
 import { db } from "../../firebase";
 import { uid } from "uid";
 import { set, ref } from "firebase/database";
@@ -114,48 +115,57 @@ function AddNewLab() {
         "Invalid email format. Please enter a valid email address."
       );
       isValid = false;
-    } 
+    }
 
     if (!amount) {
       setAmountError("Amount is required");
       isValid = false;
-    }else if (!amountPattern.test(amount)) {
-      setAmountError(
-        "Invalid amount format. Please enter a valid amount."
-      );
+    } else if (!amountPattern.test(amount)) {
+      setAmountError("Invalid amount format. Please enter a valid amount.");
       isValid = false;
-    } 
+    }
 
     if (!isValid) {
       setShowAddedUnsuccessModal(true);
       return; //not proceed if there are validation errors
     } else {
-      const uuid = uid();
-      set(ref(db, `/${uuid}`), {
-        userName,
-        LabName,
-        district,
-        telephone,
-        paymentDate,
-        password,
-        address,
-        province,
-        email,
-        amount,
+      bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(password, salt, (err, hashedPassword) => {
+          if (err) {
+            console.error("Error hashing password:", err);
+            return;
+          }
+
+          //writting data to the firebase
+          const uuid = uid();
+          set(ref(db, `labs/${uuid}`), {
+            uuid,
+            userName,
+            LabName,
+            district,
+            telephone,
+            paymentDate,
+            password: hashedPassword, //store the hashed password
+            address,
+            province,
+            email,
+            amount,
+          });
+
+          setUserName("");
+          setLabName("");
+          setDistrict("");
+          setTelephone("");
+          setPaymentDate("");
+          setPassword("");
+          setAddress("");
+          setProvince("");
+          setEmail("");
+          setAmount("");
+
+          setShowAddedSuccessModal(true);
+        });
       });
-
-      setUserName("");
-      setLabName("");
-      setDistrict("");
-      setTelephone("");
-      setPaymentDate("");
-      setPassword("");
-      setAddress("");
-      setProvince("");
-      setEmail("");
-      setAmount("");
-
-      setShowAddedSuccessModal(true);
     }
   };
   //read
@@ -177,7 +187,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter user name"
-                    className={`${userNameError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      userNameError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={userName}
                     onChange={(e) => {
                       setUserName(e.target.value);
@@ -192,7 +206,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter Lab name"
-                    className={`${labNameError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      labNameError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={LabName}
                     onChange={(e) => {
                       setLabName(e.target.value);
@@ -207,7 +225,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter district"
-                    className={`${districtError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      districtError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={district}
                     onChange={(e) => {
                       setDistrict(e.target.value);
@@ -222,7 +244,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter telephone number"
-                    className={`${telephoneError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      telephoneError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={telephone}
                     onChange={(e) => {
                       setTelephone(e.target.value);
@@ -239,7 +265,11 @@ function AddNewLab() {
                   <input
                     type="date"
                     placeholder="Enter payment date as MM-dd-YYYY"
-                    className={`${paymentDateError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      paymentDateError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={paymentDate}
                     onChange={(e) => {
                       setPaymentDate(e.target.value);
@@ -257,7 +287,11 @@ function AddNewLab() {
                   <input
                     type="password"
                     placeholder="Enter password"
-                    className={`${passwordError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      passwordError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -272,7 +306,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter address"
-                    className={`${addressError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      addressError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={address}
                     onChange={(e) => {
                       setAddress(e.target.value);
@@ -287,7 +325,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter province"
-                    className={`${provinceError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      provinceError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={province}
                     onChange={(e) => {
                       setProvince(e.target.value);
@@ -302,7 +344,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter email"
-                    className={`${emailError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      emailError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -317,7 +363,11 @@ function AddNewLab() {
                   <input
                     type="text"
                     placeholder="Enter amount"
-                    className={`${amountError === "" ? "border-secondary-blue bg-white" : "border-white bg-red-2 text-white dark:text-white"} w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                    className={`${
+                      amountError === ""
+                        ? "border-secondary-blue bg-white"
+                        : "border-white bg-red-2 text-white dark:text-white"
+                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
                     value={amount}
                     onChange={(e) => {
                       setAmount(e.target.value);
