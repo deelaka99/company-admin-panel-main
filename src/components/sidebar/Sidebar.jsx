@@ -14,7 +14,6 @@ import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
   const [activeLink, setActiveLink] = useState("dashboard");
-  const sideBarItems = ["Dashboard", "Management", "Profile", "Settings"];
 
   const handleLinkClick = (link) => {
     setActiveLink(link);

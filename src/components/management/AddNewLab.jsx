@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { React, useState} from "react";
 import bcrypt from "bcryptjs";
 import { db } from "../../firebase";
 import { uid } from "uid";
