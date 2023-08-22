@@ -1,20 +1,29 @@
 import { React, useState, useEffect } from "react";
 import { db } from "../../firebase";
-import { update, ref, onValue } from "firebase/database";
+import { update, remove, ref, onValue } from "firebase/database";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import NotificationModal from "../Modal/NotificationModal";
 
 function Manage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [labsData, setLabsData] = useState([]); // State to store retrieved data
-
   const [selectedLab, setSelectedLab] = useState({
-    uuid:"",
+    uuid: "",
     LabName: "",
     address: "",
     telephone: "",
     email: "",
   });
+
+  const [showLabUpdateSuccessModal, setShowLabUpdateSuccessModal] =
+    useState(false);
+  const [showLabUpdateUnsuccessModal, setShowLabUpdateUnsuccessModal] =
+    useState(false);
+  const [showLabRemoveSuccessModal, setShowLabRemoveSuccessModal] =
+    useState(false);
+  const [showLabRemoveUnsuccessModal, setShowLabRemoveUnsuccessModal] =
+    useState(false);
 
   // useEffect hook to fetch data from Firebase
   useEffect(() => {
@@ -44,10 +53,28 @@ function Manage() {
       .then(() => {
         // Data updated successfully
         console.log("Lab data updated!");
-        setShowEditModal(false); // Close the modal
+        setShowEditModal(false); // Close the Edit modal
+        setShowLabUpdateSuccessModal(true);
       })
       .catch((error) => {
         console.error("Error updating lab data:", error);
+        setShowLabUpdateUnsuccessModal(true);
+      });
+  };
+
+  //Remove a lab
+  const removeLab = () => {
+    const labRef = ref(db, `labs/${selectedLab.uuid}/`);
+
+    // Remove the lab from Firebase
+    remove(labRef)
+      .then(() => {
+        console.log("Lab removed successfully");
+        setShowLabRemoveSuccessModal(true);
+      })
+      .catch((error) => {
+        console.error("Error removing lab:", error);
+        setShowLabRemoveUnsuccessModal(true);
       });
   };
 
@@ -100,7 +127,12 @@ function Manage() {
                       <button className="bg-yellow text-black p-1 rounded shadow-lg hover:opacity-80">
                         Block
                       </button>
-                      <button className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80">
+                      <button
+                        className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80"
+                        onClick={() => {
+                          removeLab();
+                        }}
+                      >
                         Remove
                       </button>
                     </td>
@@ -229,8 +261,59 @@ function Manage() {
           <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
         </div>
       ) : null}
+
+      {/**lab update success modal */}
+      {showLabUpdateSuccessModal ? (
+        <NotificationModal
+          show={showLabUpdateSuccessModal}
+          onClose={() => {
+            setShowLabUpdateSuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Updated Successfull! 😎"
+          color="green"
+        />
+      ) : null}
+
+      {/**lab update Unsuccess modal */}
+      {showLabUpdateSuccessModal ? (
+        <NotificationModal
+          show={showLabUpdateUnsuccessModal}
+          onClose={() => {
+            setShowLabUpdateUnsuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Updated Unsuccessfull! 😥"
+          color="red"
+        />
+      ) : null}
+
+      {/**lab remove success modal */}
+      {showLabRemoveSuccessModal ? (
+        <NotificationModal
+          show={showLabRemoveSuccessModal}
+          onClose={() => {
+            setShowLabRemoveSuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Removal Successfull! 🤗"
+          color="green"
+        />
+      ) : null}
+
+      {/**lab remove unsuccess modal */}
+      {showLabRemoveUnsuccessModal ? (
+        <NotificationModal
+          show={showLabRemoveUnsuccessModal}
+          onClose={() => {
+            setShowLabRemoveUnsuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Removal Unsuccessfull! 🤗"
+          color="red"
+        />
+      ) : null}
     </div>
   );
 }
-
 export default Manage;
