@@ -139,6 +139,7 @@ function AddNewLab() {
           //writting data to the firebase
           const uuid = uid();
           set(ref(db, `labs/${uuid}`), {
+            uuid,
             userName,
             LabName,
             district,

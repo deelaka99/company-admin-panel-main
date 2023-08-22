@@ -1,15 +1,15 @@
 import { React, useState, useEffect } from "react";
 import { db } from "../../firebase";
-import { ref, onValue, update } from "firebase/database";
+import { update, ref, onValue } from "firebase/database";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 
 function Manage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [labsData, setLabsData] = useState([]); // State to store retrieved data
-  // const [editLabData, setEditLabData] = useState({}); // State to store lab data for editing
 
   const [selectedLab, setSelectedLab] = useState({
+    uuid:"",
     LabName: "",
     address: "",
     telephone: "",
@@ -29,22 +29,27 @@ function Manage() {
     });
   }, []);
 
-  // Function to update lab data in Firebase
-  // const updateLabData = async () => {
-  //   try {
-  //     const labRef = ref(db, `labs/${editLabData.uuid}`); // Assuming "uuid" is the unique identifier
-  //     await update(labRef, {
-  //       LabName: editLabData.LabName,
-  //       address: editLabData.address,
-  //       telephone: editLabData.telephone,
-  //       email: editLabData.email
-  //     });
-  //     setShowEditModal(false);
-  //   } catch (error) {
-  //     //handle error
-  //     console.error("Error updating lab data:", error);
-  //   }
-  // };
+  // Lab update function
+  const updateLabData = () => {
+    const labRef = ref(db, `labs/${selectedLab.uuid}`); // Assuming you have an "id" property in your lab object
+    const updates = {
+      LabName: selectedLab.LabName,
+      address: selectedLab.address,
+      telephone: selectedLab.telephone,
+      email: selectedLab.email,
+    };
+
+    // Update the data in Firebase
+    update(labRef, updates)
+      .then(() => {
+        // Data updated successfully
+        console.log("Lab data updated!");
+        setShowEditModal(false); // Close the modal
+      })
+      .catch((error) => {
+        console.error("Error updating lab data:", error);
+      });
+  };
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -88,7 +93,6 @@ function Manage() {
                         onClick={() => {
                           setSelectedLab(lab);
                           setShowEditModal(true);
-                          setEditLabData({ ...lab }); 
                         }}
                       >
                         Edit
@@ -213,7 +217,7 @@ function Manage() {
                   <button
                     className="bg-primary-blue text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
                     type="button"
-                    onClick={() => setShowEditModal(false)}
+                    onClick={updateLabData}
                   >
                     <FontAwesomeIcon icon={faFloppyDisk} />
                     &nbsp; Save
