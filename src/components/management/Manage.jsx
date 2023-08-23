@@ -12,8 +12,13 @@ function Manage() {
     uuid: "",
     LabName: "",
     address: "",
-    telephone: "",
+    amount: "",
+    district: "",
     email: "",
+    password: "",
+    paymentDate: "",
+    province: "",
+    telephone: "",
   });
 
   const [showLabUpdateSuccessModal, setShowLabUpdateSuccessModal] =
@@ -24,6 +29,11 @@ function Manage() {
     useState(false);
   const [showLabRemoveUnsuccessModal, setShowLabRemoveUnsuccessModal] =
     useState(false);
+  const [showWarningLabBlockModal, setShowWarningLabBlockModal] =
+    useState(false);
+  const [blockedStatus, setBlockedStatus] = useState(
+    labsData.map(() => false) // Initialize with all labs as unblocked
+  );
 
   // useEffect hook to fetch data from Firebase
   useEffect(() => {
@@ -63,19 +73,27 @@ function Manage() {
   };
 
   //Remove a lab
-  const removeLab = () => {
-    const labRef = ref(db, `labs/${selectedLab.uuid}/`);
+  const removeLab = (slectedLab) => {
+    console.log("selectedLab:", slectedLab); // Check the selectedLab object
+
+    const labRef = ref(db, "labs/" + slectedLab);
 
     // Remove the lab from Firebase
     remove(labRef)
       .then(() => {
-        console.log("Lab removed successfully");
         setShowLabRemoveSuccessModal(true);
       })
       .catch((error) => {
         console.error("Error removing lab:", error);
         setShowLabRemoveUnsuccessModal(true);
       });
+  };
+
+  //blocking lab
+  const handleToggleBlock = (index) => {
+    const updatedBlockedStatus = [...blockedStatus];
+    updatedBlockedStatus[index] = !updatedBlockedStatus[index];
+    setBlockedStatus(updatedBlockedStatus);
   };
 
   return (
@@ -98,9 +116,7 @@ function Manage() {
                   <th scope="col" className="px-6 py-3">
                     Email
                   </th>
-                  <th scope="col" className="px-4 py-3">
-                    Statues
-                  </th>
+
                   <th scope="col" className="px-6 py-3">
                     Action
                   </th>
@@ -113,7 +129,7 @@ function Manage() {
                     <td className="px-6 py-4">{lab.address}</td>
                     <td className="px-6 py-4">{lab.telephone}</td>
                     <td className="px-6 py-4">{lab.email}</td>
-                    <td className="px-6 py-4">Active</td>
+
                     <td className="px-6 py-4 space-x-2 flex">
                       <button
                         className="bg-blue text-white p-1 rounded shadow-lg hover:opacity-80"
@@ -124,13 +140,23 @@ function Manage() {
                       >
                         Edit
                       </button>
-                      <button className="bg-yellow text-black p-1 rounded shadow-lg hover:opacity-80">
-                        Block
+                      <button
+                        className={`${
+                          blockedStatus[index]
+                            ? "bg-red-2 text-white"
+                            : "bg-yellow"
+                        } text-black p-1 rounded shadow-lg hover:opacity-80`}
+                        onClick={() => {
+                          setShowWarningLabBlockModal(true);
+                          handleToggleBlock(index);
+                        }}
+                      >
+                        {blockedStatus[index] ? "Unblock" : "Block"}
                       </button>
                       <button
                         className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80"
                         onClick={() => {
-                          removeLab();
+                          removeLab(lab.uuid);
                         }}
                       >
                         Remove
@@ -253,6 +279,57 @@ function Manage() {
                   >
                     <FontAwesomeIcon icon={faFloppyDisk} />
                     &nbsp; Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
+        </div>
+      ) : null}
+
+      {/**Warning lab block modal */}
+      {showWarningLabBlockModal ? (
+        <div>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-primary-blue dark:text-white">
+            <div className="relative w-auto my-6 mx-auto max-w-3xl">
+              {/*content*/}
+              <div className="p-2 border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-ternary-blue dark:bg-dark-secondary dark:border-2 dark:border-dark-ternary outline-none focus:outline-none">
+                {/*header*/}
+                <div className="flex items-start justify-between p-1 rounded-t">
+                  <h3 className="text-xl font-semibold">Notification</h3>
+                  <button
+                    className=" ml-auto  border-0 text-primary-blue font-semibold active:text-black"
+                    onClick={() => setShowWarningLabBlockModal(false)}
+                  >
+                    <span className=" text-primary-blue drop-shadow-lg shadow-black h-6 w-6 text-3xl block dark:text-white flex items-center justify-center">
+                      ×
+                    </span>
+                  </button>
+                </div>
+                {/*body*/}
+                <div className="relative p-2 flex flex-col">Are You sure?</div>
+                {/*footer*/}
+                <div className="flex items-center justify-center p-1 rounded-b">
+                  <button
+                    className="bg-primary-blue text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
+                    type="button"
+                    onClick={() => {
+                      setShowWarningLabBlockModal(false);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faFloppyDisk} />
+                    &nbsp; Yes
+                  </button>
+                  <button
+                    className="bg-primary-blue text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
+                    type="button"
+                    onClick={() => {
+                      setShowWarningLabBlockModal(false);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faFloppyDisk} />
+                    &nbsp; No
                   </button>
                 </div>
               </div>
