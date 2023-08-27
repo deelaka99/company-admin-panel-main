@@ -7,10 +7,10 @@ const NotificationModal = ({ show, onClose, title, body, color }) => {
 
   return (
     <div>
-      <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-white">
+      <div className={`justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none  ${color==="yellow"?"text-black":"text-white"}`}>
         <div className="relative w-auto my-6 mx-auto max-w-3xl">
           {/*content*/}
-          <div className={`p-5 rounded-lg shadow-lg relative flex flex-col w-full ${color === "green" ? "bg-green":"bg-red"} border-2 outline-none focus:outline-none`}>
+          <div className={`p-5 rounded-lg shadow-lg relative flex flex-col w-full ${color === "green" ? "bg-green":color==="red"?"bg-red":"bg-yellow"} border-2 outline-none focus:outline-none`}>
             {/*header*/}
             <div className="flex items-start justify-between p-2 rounded-t">
               <h3 className="text-sm">{title}</h3>

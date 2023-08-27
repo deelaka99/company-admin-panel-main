@@ -150,6 +150,7 @@ function AddNewLab() {
             province,
             email,
             amount,
+            blocked:false,
           });
 
           setUserName("");

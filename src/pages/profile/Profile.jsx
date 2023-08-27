@@ -5,10 +5,20 @@ import { auth, db, storage } from "../../firebase";
 import { ref as ref1, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword, updateEmail } from "firebase/auth";
 import { set, ref, onValue } from "firebase/database";
+import NotificationModal from "../../components/Modal/NotificationModal";
 
 const Profile = () => {
   const [showEditAdminModal, setShowEditAdminModal] = useState(false);
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [showAdminAddedErrorModal, setShowAdminAddedErrorModal] =
+    useState(false);
+  const [showAdminAddedErrorModal1, setShowAdminAddedErrorModal1] =
+    useState(false);
+  const [showEditAdminSuccessModal, setShowEditAdminSuccessModal] =
+    useState(false);
+  const [showEditAdminUnsuccessModal, setShowEditAdminUnsuccessModal] =
+    useState(false);
+  const [loading, setLoading] = useState(false);
   const [selectedProfilePicture, setSelectedProfilePicture] = useState(null);
   const [adminData, setAdminData] = useState({
     uid: "",
@@ -64,6 +74,7 @@ const Profile = () => {
 
   const handleAddAdmin = async () => {
     try {
+      setLoading(true); // Set loading state to true
       // Create user in Firebase Authentication
       const { email, password, phone, address, name } = adminData;
       await createUserWithEmailAndPassword(auth, email, password);
@@ -97,14 +108,20 @@ const Profile = () => {
       // Handle error
       if (error.code === "auth/email-already-in-use") {
         console.error("Email is already in use:", error.message);
+        setShowAddAdminModal(false);
+        setShowAdminAddedErrorModal(true);
       } else {
         console.error("Error adding admin:", error);
+        setShowAdminAddedErrorModal1(true);
       }
+    }finally{
+      setLoading(false); // Set loading state to false
     }
   };
 
   const handleUpdateAdmin = async () => {
     try {
+      setLoading(true); // Set loading state to true
       const user = auth.currentUser;
 
       // Update profile picture if selected
@@ -125,11 +142,12 @@ const Profile = () => {
 
       // Close the modal after updating admin
       setShowEditAdminModal(false);
-
-      // Refresh the page to reflect the changes
-      window.location.reload();
+      setShowEditAdminSuccessModal(true);
     } catch (error) {
       console.error("Error updating admin:", error);
+      setShowEditAdminUnsuccessModal(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -434,6 +452,63 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="opacity-50 fixed inset-0 z-40 bg-black"></div>
+        </>
+      ) : null}
+      {/**Email already in use modal */}
+      {showAdminAddedErrorModal ? (
+        <NotificationModal
+          show={showAdminAddedErrorModal}
+          onClose={() => {
+            setShowAdminAddedErrorModal(false);
+          }}
+          title="Notification"
+          body=" 😥Email is already in use!"
+          color="red"
+        />
+      ) : null}
+      {/**Email already in use modal */}
+      {showAdminAddedErrorModal1 ? (
+        <NotificationModal
+          show={showAdminAddedErrorModal1}
+          onClose={() => {
+            setShowAdminAddedErrorModal1(false);
+          }}
+          title="Notification"
+          body=" 😥User adding Error occured!"
+          color="red"
+        />
+      ) : null}
+      {/**Edit Admin Success */}
+      {showEditAdminSuccessModal ? (
+        <NotificationModal
+          show={showEditAdminSuccessModal}
+          onClose={() => {
+            setShowEditAdminSuccessModal(false);
+          }}
+          title="Notification"
+          body=" Admin Update Success! 🤗"
+          color="green"
+        />
+      ) : null}
+      {/**Edit Admin unsuccess */}
+      {showEditAdminUnsuccessModal ? (
+        <NotificationModal
+          show={showEditAdminUnsuccessModal}
+          onClose={() => {
+            setShowEditAdminUnsuccessModal(false);
+          }}
+          title="Notification"
+          body=" Admin Update Unsuccess! 😥"
+          color="red"
+        />
+      ) : null}
+
+      {loading ? (
+        <>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-primary-blue dark:text-white">
+            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary-blue dark:border-white"></div>
           </div>
           <div className="opacity-50 fixed inset-0 z-40 bg-black"></div>
         </>

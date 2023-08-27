@@ -29,11 +29,11 @@ function Manage() {
     useState(false);
   const [showLabRemoveUnsuccessModal, setShowLabRemoveUnsuccessModal] =
     useState(false);
-  const [showWarningLabBlockModal, setShowWarningLabBlockModal] =
-    useState(false);
   const [blockedStatus, setBlockedStatus] = useState(
     labsData.map(() => false) // Initialize with all labs as unblocked
   );
+  const [showLabBlockedModal, setShowLabBlockedModal] = useState(false);
+  const [showLabUnblockedModal, setShowLabUnblockedModal] = useState(false);
 
   // useEffect hook to fetch data from Firebase
   useEffect(() => {
@@ -89,11 +89,29 @@ function Manage() {
       });
   };
 
-  //blocking lab
   const handleToggleBlock = (index) => {
-    const updatedBlockedStatus = [...blockedStatus];
-    updatedBlockedStatus[index] = !updatedBlockedStatus[index];
-    setBlockedStatus(updatedBlockedStatus);
+    const selectedLab = labsData[index]; // Get the selected lab data
+    const labRef = ref(db, `labs/${selectedLab.uuid}`);
+  
+    // Update the blocked status of the lab in Firebase
+    const updatedBlockedStatus = !selectedLab.blocked;
+    const updates = {
+      blocked: updatedBlockedStatus,
+    };
+  
+    // Update the data in Firebase
+    update(labRef, updates)
+      .then(() => {
+        // Data updated successfully
+        console.log("Lab blocked/unblocked!");
+      })
+      .catch((error) => {
+        console.error("Error blocking lab:", error);
+      });
+  
+    const updatedLabsData = [...labsData]; // Create a copy of the labsData array
+    updatedLabsData[index].blocked = updatedBlockedStatus; // Update the blocked status in the copied array
+    setLabsData(updatedLabsData); // Update the labsData state
   };
 
   return (
@@ -129,7 +147,6 @@ function Manage() {
                     <td className="px-6 py-4">{lab.address}</td>
                     <td className="px-6 py-4">{lab.telephone}</td>
                     <td className="px-6 py-4">{lab.email}</td>
-
                     <td className="px-6 py-4 space-x-2 flex">
                       <button
                         className="bg-blue text-white p-1 rounded shadow-lg hover:opacity-80"
@@ -142,16 +159,14 @@ function Manage() {
                       </button>
                       <button
                         className={`${
-                          blockedStatus[index]
-                            ? "bg-red-2 text-white"
-                            : "bg-yellow"
+                          lab.blocked ? "bg-green text-white" : "bg-yellow"
                         } text-black p-1 rounded shadow-lg hover:opacity-80`}
                         onClick={() => {
-                          setShowWarningLabBlockModal(true);
                           handleToggleBlock(index);
+                          lab.blocked? setShowLabBlockedModal(true): setShowLabUnblockedModal(true);
                         }}
                       >
-                        {blockedStatus[index] ? "Unblock" : "Block"}
+                        {lab.blocked ? "Unblock" : "Block"}
                       </button>
                       <button
                         className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80"
@@ -288,60 +303,6 @@ function Manage() {
         </div>
       ) : null}
 
-      {/**Warning lab block modal */}
-      {showWarningLabBlockModal ? (
-        <div>
-          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-primary-blue dark:text-white">
-            <div className="relative w-auto my-6 mx-auto max-w-3xl">
-              {/*content*/}
-              <div className="p-2 border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-ternary-blue dark:bg-dark-secondary dark:border-2 dark:border-dark-ternary outline-none focus:outline-none">
-                {/*header*/}
-                <div className="flex items-start justify-between p-1 rounded-t">
-                  <h3 className="text-xl font-semibold">Notification</h3>
-                  <button
-                    className=" ml-auto  border-0 text-primary-blue font-semibold active:text-black"
-                    onClick={() => setShowWarningLabBlockModal(false)}
-                  >
-                    <span className=" text-primary-blue drop-shadow-lg shadow-black h-6 w-6 text-3xl block dark:text-white flex items-center justify-center">
-                      ×
-                    </span>
-                  </button>
-                </div>
-                {/*body*/}
-                <div className="relative p-5 flex flex-col">
-                  <h1 className="pl-20 pr-20 text-lg font-inter">
-                    Are You sure?
-                  </h1>
-                </div>
-                {/*footer*/}
-                <div className="flex items-center justify-center p-1 rounded-b">
-                  <button
-                    className="bg-primary-blue text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
-                    type="button"
-                    onClick={() => {
-                      setShowWarningLabBlockModal(false);
-                      handleToggleBlock(index);
-                    }}
-                  >
-                    Yes
-                  </button>
-                  <button
-                    className="bg-red-2 text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => {
-                      setShowWarningLabBlockModal(false);
-                    }}
-                  >
-                    No
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
-        </div>
-      ) : null}
-
       {/**lab update success modal */}
       {showLabUpdateSuccessModal ? (
         <NotificationModal
@@ -376,8 +337,8 @@ function Manage() {
             setShowLabRemoveSuccessModal(false);
           }}
           title="Notification"
-          body="Lab Removal Successfull! 🤗"
-          color="green"
+          body="Lab Removed! 🤔"
+          color="red"
         />
       ) : null}
 
@@ -391,6 +352,32 @@ function Manage() {
           title="Notification"
           body="Lab Removal Unsuccessfull! 🤗"
           color="red"
+        />
+      ) : null}
+
+      {/**lab blocked success modal */}
+      {showLabBlockedModal ? (
+        <NotificationModal
+          show={showLabBlockedModal}
+          onClose={() => {
+            setShowLabBlockedModal(false);
+          }}
+          title="Notification"
+          body="Lab Blocked! 🤔"
+          color="yellow"
+        />
+      ) : null}
+
+      {/**lab unblocked success modal */}
+      {showLabUnblockedModal ? (
+        <NotificationModal
+          show={showLabUnblockedModal}
+          onClose={() => {
+            setShowLabUnblockedModal(false);
+          }}
+          title="Notification"
+          body="Lab UnBlocked! 🤗"
+          color="green"
         />
       ) : null}
     </div>
