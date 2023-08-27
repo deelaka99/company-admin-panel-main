@@ -168,11 +168,6 @@ function AddNewLab() {
       });
     }
   };
-  //read
-
-  //update
-
-  //delete
 
   return (
     <div className="flex flex-col w-full h-full ">

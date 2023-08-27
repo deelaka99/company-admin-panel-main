@@ -308,7 +308,11 @@ function Manage() {
                   </button>
                 </div>
                 {/*body*/}
-                <div className="relative p-2 flex flex-col">Are You sure?</div>
+                <div className="relative p-5 flex flex-col">
+                  <h1 className="pl-20 pr-20 text-lg font-inter">
+                    Are You sure?
+                  </h1>
+                </div>
                 {/*footer*/}
                 <div className="flex items-center justify-center p-1 rounded-b">
                   <button
@@ -316,20 +320,19 @@ function Manage() {
                     type="button"
                     onClick={() => {
                       setShowWarningLabBlockModal(false);
+                      handleToggleBlock(index);
                     }}
                   >
-                    <FontAwesomeIcon icon={faFloppyDisk} />
-                    &nbsp; Yes
+                    Yes
                   </button>
                   <button
-                    className="bg-primary-blue text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
+                    className="bg-red-2 text-white active:bg-black font-bold uppercase text-md px-3 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => {
                       setShowWarningLabBlockModal(false);
                     }}
                   >
-                    <FontAwesomeIcon icon={faFloppyDisk} />
-                    &nbsp; No
+                    No
                   </button>
                 </div>
               </div>
