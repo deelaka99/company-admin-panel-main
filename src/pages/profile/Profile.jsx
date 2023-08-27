@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { auth, db, storage } from "../../firebase";
 import { ref as ref1, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { set, ref } from "firebase/database";
+import { set, ref, onValue } from "firebase/database";
 
 const Profile = () => {
   const [showEditAdminModal, setShowEditAdminModal] = useState(false);
@@ -18,6 +18,29 @@ const Profile = () => {
     address: "",
     password: "",
   });
+  const [currentAdminData, setCurrentAdminData] = useState({
+    uid: "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    password: "",
+    profilePicture: "",
+  });
+
+  useEffect(() => {
+    // Fetch admin data from Realtime Database
+    const user = auth.currentUser;
+    if (user) {
+      const adminRef = ref(db, `admins/${user.uid}`);
+      onValue(adminRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const adminDetails = snapshot.val();
+          setCurrentAdminData(adminDetails);
+        }
+      });
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -43,8 +66,11 @@ const Profile = () => {
 
       // Upload profile picture to Firebase Storage
       const storageRef = ref1(storage, "profilePictures/" + user.uid);
-      const uploadTask = uploadBytes(storageRef, selectedProfilePicture);
-      const downloadURL = await getDownloadURL(storageRef);
+      await uploadBytes(storageRef, selectedProfilePicture);
+
+      // Retrieve the download URL using a new reference
+      const downloadURLRef = ref1(storage, "profilePictures/" + user.uid);
+      const downloadURL = await getDownloadURL(downloadURLRef);
 
       // Update admin details to include profile picture URL
       const adminDetails = { ...adminData };
@@ -52,15 +78,14 @@ const Profile = () => {
 
       // Store admin details in the Realtime Database
       await set(ref(db, `admins/${user.uid}`), {
-        uid: user.uid, 
+        uid: user.uid,
         name,
         email,
         phone,
         address,
         profilePicture: adminDetails.profilePicture,
       });
-      // Close the modal after adding admin
-      setShowAddAdminModal(false);
+      window.location.reload();
     } catch (error) {
       // Handle error
       if (error.code === "auth/email-already-in-use") {
@@ -77,18 +102,14 @@ const Profile = () => {
         <div className="h-5/6 w-11/12 bg-primary-blue  border-2 border-secondary-blue rounded-lg flex dark:bg-dark-primary dark:border-dark-ternary">
           <div className="w-3/12 h-full flex items-center justify-center">
             <div className="w-36 h-36 rounded-full bg-primary-blue overflow-hidden flex items-center justify-center border-4 border-white">
-              <img
-                className=""
-                src="https://images.pexels.com/photos/3796217/pexels-photo-3796217.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                alt=""
-              />
+              <img className="" src={currentAdminData.profilePicture} alt="" />
             </div>
           </div>
           <div className="w-8/12 h-full  flex items-center justify-center pl-8 text-white">
             <div className="w-full h-1/4 flex flex-col">
               <div className="h-full flex">
                 <h1 className="text-4xl font-inter font-medium pr-5">
-                  Linada Annabel
+                  {currentAdminData.name}
                 </h1>
                 <button onClick={() => setShowEditAdminModal(true)}>
                   <FontAwesomeIcon icon={faPencil} />
@@ -125,9 +146,9 @@ const Profile = () => {
               </div>
             </div>
             <div className="h-full w-4/5 pt-5">
-              <h1 className="pt-5">123wejith@gmail.com</h1>
-              <h1 className="pt-5">+94 77 133 9343</h1>
-              <h1 className="pt-5">105/01/136, Horagala East, Padukka.</h1>
+              <h1 className="pt-5">{currentAdminData.email}</h1>
+              <h1 className="pt-5">{currentAdminData.phone}</h1>
+              <h1 className="pt-5">{currentAdminData.address}</h1>
             </div>
           </div>
         </div>
