@@ -1,20 +1,39 @@
 import { React, useState, useEffect } from "react";
 import { db } from "../../firebase";
-import { update, ref, onValue } from "firebase/database";
+import { update, remove, ref, onValue } from "firebase/database";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import NotificationModal from "../Modal/NotificationModal";
 
 function Manage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [labsData, setLabsData] = useState([]); // State to store retrieved data
-
   const [selectedLab, setSelectedLab] = useState({
-    uuid:"",
+    uuid: "",
     LabName: "",
     address: "",
-    telephone: "",
+    amount: "",
+    district: "",
     email: "",
+    password: "",
+    paymentDate: "",
+    province: "",
+    telephone: "",
   });
+
+  const [showLabUpdateSuccessModal, setShowLabUpdateSuccessModal] =
+    useState(false);
+  const [showLabUpdateUnsuccessModal, setShowLabUpdateUnsuccessModal] =
+    useState(false);
+  const [showLabRemoveSuccessModal, setShowLabRemoveSuccessModal] =
+    useState(false);
+  const [showLabRemoveUnsuccessModal, setShowLabRemoveUnsuccessModal] =
+    useState(false);
+  const [blockedStatus, setBlockedStatus] = useState(
+    labsData.map(() => false) // Initialize with all labs as unblocked
+  );
+  const [showLabBlockedModal, setShowLabBlockedModal] = useState(false);
+  const [showLabUnblockedModal, setShowLabUnblockedModal] = useState(false);
 
   // useEffect hook to fetch data from Firebase
   useEffect(() => {
@@ -44,11 +63,55 @@ function Manage() {
       .then(() => {
         // Data updated successfully
         console.log("Lab data updated!");
-        setShowEditModal(false); // Close the modal
+        setShowEditModal(false); // Close the Edit modal
+        setShowLabUpdateSuccessModal(true);
       })
       .catch((error) => {
         console.error("Error updating lab data:", error);
+        setShowLabUpdateUnsuccessModal(true);
       });
+  };
+
+  //Remove a lab
+  const removeLab = (slectedLab) => {
+    console.log("selectedLab:", slectedLab); // Check the selectedLab object
+
+    const labRef = ref(db, "labs/" + slectedLab);
+
+    // Remove the lab from Firebase
+    remove(labRef)
+      .then(() => {
+        setShowLabRemoveSuccessModal(true);
+      })
+      .catch((error) => {
+        console.error("Error removing lab:", error);
+        setShowLabRemoveUnsuccessModal(true);
+      });
+  };
+
+  const handleToggleBlock = (index) => {
+    const selectedLab = labsData[index]; // Get the selected lab data
+    const labRef = ref(db, `labs/${selectedLab.uuid}`);
+  
+    // Update the blocked status of the lab in Firebase
+    const updatedBlockedStatus = !selectedLab.blocked;
+    const updates = {
+      blocked: updatedBlockedStatus,
+    };
+  
+    // Update the data in Firebase
+    update(labRef, updates)
+      .then(() => {
+        // Data updated successfully
+        console.log("Lab blocked/unblocked!");
+      })
+      .catch((error) => {
+        console.error("Error blocking lab:", error);
+      });
+  
+    const updatedLabsData = [...labsData]; // Create a copy of the labsData array
+    updatedLabsData[index].blocked = updatedBlockedStatus; // Update the blocked status in the copied array
+    setLabsData(updatedLabsData); // Update the labsData state
   };
 
   return (
@@ -71,9 +134,7 @@ function Manage() {
                   <th scope="col" className="px-6 py-3">
                     Email
                   </th>
-                  <th scope="col" className="px-4 py-3">
-                    Statues
-                  </th>
+
                   <th scope="col" className="px-6 py-3">
                     Action
                   </th>
@@ -86,7 +147,6 @@ function Manage() {
                     <td className="px-6 py-4">{lab.address}</td>
                     <td className="px-6 py-4">{lab.telephone}</td>
                     <td className="px-6 py-4">{lab.email}</td>
-                    <td className="px-6 py-4">Active</td>
                     <td className="px-6 py-4 space-x-2 flex">
                       <button
                         className="bg-blue text-white p-1 rounded shadow-lg hover:opacity-80"
@@ -97,10 +157,23 @@ function Manage() {
                       >
                         Edit
                       </button>
-                      <button className="bg-yellow text-black p-1 rounded shadow-lg hover:opacity-80">
-                        Block
+                      <button
+                        className={`${
+                          lab.blocked ? "bg-green text-white" : "bg-yellow"
+                        } text-black p-1 rounded shadow-lg hover:opacity-80`}
+                        onClick={() => {
+                          handleToggleBlock(index);
+                          lab.blocked? setShowLabBlockedModal(true): setShowLabUnblockedModal(true);
+                        }}
+                      >
+                        {lab.blocked ? "Unblock" : "Block"}
                       </button>
-                      <button className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80">
+                      <button
+                        className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80"
+                        onClick={() => {
+                          removeLab(lab.uuid);
+                        }}
+                      >
                         Remove
                       </button>
                     </td>
@@ -229,8 +302,85 @@ function Manage() {
           <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
         </div>
       ) : null}
+
+      {/**lab update success modal */}
+      {showLabUpdateSuccessModal ? (
+        <NotificationModal
+          show={showLabUpdateSuccessModal}
+          onClose={() => {
+            setShowLabUpdateSuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Updated Successfull! 😎"
+          color="green"
+        />
+      ) : null}
+
+      {/**lab update Unsuccess modal */}
+      {showLabUpdateSuccessModal ? (
+        <NotificationModal
+          show={showLabUpdateUnsuccessModal}
+          onClose={() => {
+            setShowLabUpdateUnsuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Updated Unsuccessfull! 😥"
+          color="red"
+        />
+      ) : null}
+
+      {/**lab remove success modal */}
+      {showLabRemoveSuccessModal ? (
+        <NotificationModal
+          show={showLabRemoveSuccessModal}
+          onClose={() => {
+            setShowLabRemoveSuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Removed! 🤔"
+          color="red"
+        />
+      ) : null}
+
+      {/**lab remove unsuccess modal */}
+      {showLabRemoveUnsuccessModal ? (
+        <NotificationModal
+          show={showLabRemoveUnsuccessModal}
+          onClose={() => {
+            setShowLabRemoveUnsuccessModal(false);
+          }}
+          title="Notification"
+          body="Lab Removal Unsuccessfull! 🤗"
+          color="red"
+        />
+      ) : null}
+
+      {/**lab blocked success modal */}
+      {showLabBlockedModal ? (
+        <NotificationModal
+          show={showLabBlockedModal}
+          onClose={() => {
+            setShowLabBlockedModal(false);
+          }}
+          title="Notification"
+          body="Lab Blocked! 🤔"
+          color="yellow"
+        />
+      ) : null}
+
+      {/**lab unblocked success modal */}
+      {showLabUnblockedModal ? (
+        <NotificationModal
+          show={showLabUnblockedModal}
+          onClose={() => {
+            setShowLabUnblockedModal(false);
+          }}
+          title="Notification"
+          body="Lab UnBlocked! 🤗"
+          color="green"
+        />
+      ) : null}
     </div>
   );
 }
-
 export default Manage;

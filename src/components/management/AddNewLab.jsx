@@ -150,6 +150,7 @@ function AddNewLab() {
             province,
             email,
             amount,
+            blocked:false,
           });
 
           setUserName("");
@@ -168,11 +169,6 @@ function AddNewLab() {
       });
     }
   };
-  //read
-
-  //update
-
-  //delete
 
   return (
     <div className="flex flex-col w-full h-full ">
