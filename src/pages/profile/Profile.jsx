@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { auth, db, storage } from "../../firebase";
 import { ref as ref1, uploadBytes, getDownloadURL } from "firebase/storage";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateEmail } from "firebase/auth";
 import { set, ref, onValue } from "firebase/database";
 
 const Profile = () => {
@@ -26,6 +26,13 @@ const Profile = () => {
     address: "",
     password: "",
     profilePicture: "",
+  });
+
+  const [updatedAdminData, setUpdatedAdminData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
 
   useEffect(() => {
@@ -93,6 +100,36 @@ const Profile = () => {
       } else {
         console.error("Error adding admin:", error);
       }
+    }
+  };
+
+  const handleUpdateAdmin = async () => {
+    try {
+      const user = auth.currentUser;
+
+      // Update profile picture if selected
+      if (selectedProfilePicture) {
+        const storageRef = ref1(storage, "profilePictures/" + user.uid);
+        await uploadBytes(storageRef, selectedProfilePicture);
+        const downloadURL = await getDownloadURL(storageRef);
+        updatedAdminData.profilePicture = downloadURL;
+      }
+
+      // Update admin email in Firebase Authentication
+      if (user) {
+        await updateEmail(user, updatedAdminData.email);
+      }
+
+      // Update admin details in the Realtime Database
+      await set(ref(db, `admins/${user.uid}`), updatedAdminData);
+
+      // Close the modal after updating admin
+      setShowEditAdminModal(false);
+
+      // Refresh the page to reflect the changes
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating admin:", error);
     }
   };
 
@@ -307,6 +344,13 @@ const Profile = () => {
                         <input
                           type="text"
                           placeholder="Existing name"
+                          value={updatedAdminData.name}
+                          onChange={(e) =>
+                            setUpdatedAdminData((prevData) => ({
+                              ...prevData,
+                              name: e.target.value,
+                            }))
+                          }
                           className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
                         />
                       </div>
@@ -319,6 +363,13 @@ const Profile = () => {
                         <input
                           type="text"
                           placeholder="Existing email"
+                          value={updatedAdminData.email}
+                          onChange={(e) =>
+                            setUpdatedAdminData((prevData) => ({
+                              ...prevData,
+                              email: e.target.value,
+                            }))
+                          }
                           className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
                         />
                       </div>
@@ -331,6 +382,13 @@ const Profile = () => {
                         <input
                           type="text"
                           placeholder="Existing phone"
+                          value={updatedAdminData.phone}
+                          onChange={(e) =>
+                            setUpdatedAdminData((prevData) => ({
+                              ...prevData,
+                              phone: e.target.value,
+                            }))
+                          }
                           className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
                         />
                       </div>
@@ -343,6 +401,13 @@ const Profile = () => {
                         <input
                           type="text"
                           placeholder="Existing address"
+                          value={updatedAdminData.address}
+                          onChange={(e) =>
+                            setUpdatedAdminData((prevData) => ({
+                              ...prevData,
+                              address: e.target.value,
+                            }))
+                          }
                           className="rounded-full p-2 w-full bg-white border-primary-blue border-2 text-center font-semibold dark:border-dark-ternary dark:bg-dark-ternary active:bg-secondary-blue dark:active:bg-dark-secondary"
                         />
                       </div>
@@ -352,7 +417,7 @@ const Profile = () => {
                         <p className="font-semibold">Profile picture :</p>
                       </div>
                       <div className="pt-2 pb-2">
-                        <input type="file" className="" />
+                        <input type="file" onChange={handleFileChange} />
                       </div>
                     </div>
                   </form>
@@ -362,7 +427,7 @@ const Profile = () => {
                   <button
                     className="bg-primary-blue text-white active:bg-black font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 dark:bg-dark-primary"
                     type="button"
-                    onClick={() => setShowEditAdminModal(false)}
+                    onClick={handleUpdateAdmin}
                   >
                     Update Profile
                   </button>
