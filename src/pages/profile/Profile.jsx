@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { auth, db, storage } from "../../firebase";
+import { ref as ref1, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { set, ref } from "firebase/database";
 
 const Profile = () => {
   const [showEditAdminModal, setShowEditAdminModal] = useState(false);
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [selectedProfilePicture, setSelectedProfilePicture] = useState(null);
   const [adminData, setAdminData] = useState({
     uid: "",
     name: "",
@@ -25,13 +27,10 @@ const Profile = () => {
     }));
   };
 
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files[0];
-  //   setAdminData((prevData) => ({
-  //     ...prevData,
-  //     profilePicture: file,
-  //   }));
-  // };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedProfilePicture(file);
+  };
 
   const handleAddAdmin = async () => {
     try {
@@ -42,8 +41,14 @@ const Profile = () => {
       // Get the newly created user's UID
       const user = auth.currentUser;
 
+      // Upload profile picture to Firebase Storage
+      const storageRef = ref1(storage, "profilePictures/" + user.uid);
+      const uploadTask = uploadBytes(storageRef, selectedProfilePicture);
+      const downloadURL = await getDownloadURL(storageRef);
+
       // Update admin details to include profile picture URL
       const adminDetails = { ...adminData };
+      adminDetails.profilePicture = downloadURL;
 
       // Store admin details in the Realtime Database
       await set(ref(db, `admins/${user.uid}`), {
@@ -52,6 +57,7 @@ const Profile = () => {
         email,
         phone,
         address,
+        profilePicture: adminDetails.profilePicture,
       });
       // Close the modal after adding admin
       setShowAddAdminModal(false);
@@ -228,7 +234,7 @@ const Profile = () => {
                         <p className="font-semibold">Profile picture :</p>
                       </div>
                       <div className="pt-2 pb-2">
-                        <input type="file"  />
+                        <input type="file" onChange={handleFileChange} />
                       </div>
                     </div>
                   </form>
