@@ -1,8 +1,8 @@
-import { React, useState} from "react";
+import { React, useEffect, useState } from "react";
 import bcrypt from "bcryptjs";
-import { db } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { uid } from "uid";
-import { set, ref } from "firebase/database";
+import { set, ref, onValue } from "firebase/database";
 
 function AddNewLab() {
   const [showAddedSuccessModal, setShowAddedSuccessModal] = useState(false);
@@ -10,14 +10,14 @@ function AddNewLab() {
   //variable state
   const [userName, setUserName] = useState("");
   const [LabName, setLabName] = useState("");
-  const [district, setDistrict] = useState("");
+  const [district, setDistrict] = useState("Colombo");
   const [telephone, setTelephone] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
   const [password, setPassword] = useState("");
   const [address, setAddress] = useState("");
-  const [province, setProvince] = useState("");
+  const [province, setProvince] = useState("Western");
   const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("1500");
 
   //error states
   const [userNameError, setUserNameError] = useState("");
@@ -30,6 +30,25 @@ function AddNewLab() {
   const [provinceError, setProvinceError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [amountError, setAmountError] = useState("");
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      const adminRef = ref(db,`admins/${user.uid}`);
+      const unsubscribe = onValue(adminRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const adminData = snapshot.val();
+          const adminUsername = adminData.name; // Assuming "name" is the field containing the admin username
+          setUserName(adminUsername);
+        }
+      });
+
+      // Unsubscribe from the onValue listener when the component unmounts
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, []);
 
   //write
   const writeToDatabase = () => {
@@ -150,7 +169,7 @@ function AddNewLab() {
             province,
             email,
             amount,
-            blocked:false,
+            blocked: false,
           });
 
           setUserName("");
@@ -354,7 +373,7 @@ function AddNewLab() {
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
-                <div className="h-full w-2/6 flex items-center">Amount</div>
+                <div className="h-full w-2/6 flex items-center">Amount (Rs)</div>
                 <div className="h-full w-4/6 p-2">
                   <input
                     type="text"
