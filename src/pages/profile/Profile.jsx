@@ -27,6 +27,7 @@ const Profile = () => {
     phone: "",
     address: "",
     password: "",
+    type: "company",
   });
   const [currentAdminData, setCurrentAdminData] = useState({
     uid: "",
@@ -35,6 +36,7 @@ const Profile = () => {
     phone: "",
     address: "",
     password: "",
+    type:"",
     profilePicture: "",
   });
 
@@ -76,7 +78,7 @@ const Profile = () => {
     try {
       setLoading(true); // Set loading state to true
       // Create user in Firebase Authentication
-      const { email, password, phone, address, name } = adminData;
+      const { email, password, phone, address, name, type } = adminData;
       await createUserWithEmailAndPassword(auth, email, password);
 
       // Get the newly created user's UID
@@ -102,6 +104,7 @@ const Profile = () => {
         phone,
         address,
         profilePicture: adminDetails.profilePicture,
+        type,
       });
       window.location.reload();
     } catch (error) {
