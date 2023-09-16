@@ -38,7 +38,6 @@ const Sidebar = () => {
           {/* {sideBarItems.map((item)=> <>{item}</>)} */}
           <NavLink
             to="/admin/dashboard"
-            activeClassName="bg-secondary-blue dark:bg-dark-secondary"
             className={`${
               activeLink === "dashboard"
                 ? "bg-secondary-blue dark:bg-dark-secondary"
@@ -53,7 +52,6 @@ const Sidebar = () => {
 
           <NavLink
             to="/admin/management"
-            activeClassName="bg-secondary-blue dark:bg-dark-secondary"
             className={`${
               activeLink === "management"
                 ? "bg-secondary-blue dark:bg-dark-secondary"
@@ -68,7 +66,6 @@ const Sidebar = () => {
 
           <NavLink
             to="/admin/profile"
-            activeClassName="bg-secondary-blue dark:bg-dark-secondary"
             className={`${
               activeLink === "profile"
                 ? "bg-secondary-blue dark:bg-dark-secondary"
@@ -83,7 +80,6 @@ const Sidebar = () => {
 
           <NavLink
             to="/admin/settings"
-            activeClassName="bg-secondary-blue dark:bg-dark-secondary"
             className={`${
               activeLink === "settings"
                 ? "bg-secondary-blue dark:bg-dark-secondary"
