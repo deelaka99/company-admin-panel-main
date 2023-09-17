@@ -69,8 +69,8 @@ const Login = (props) => {
                   />
                   <br />
                   <div className="text-red font-bold p-3">
-                    {error && <span>Invalid Email or Password!</span>}
-                    {userTypeError === 1 ? <span>Invalid Email or Password!</span> : null}
+                    {error && <span>Invalid Email or Password!</span> &&
+                    userTypeError === 1 ? <span>User type doesn't match!</span> : null}
                   </div>
                   <button
                     type="submit"
