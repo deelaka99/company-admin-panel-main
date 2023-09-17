@@ -9,21 +9,38 @@ import Settings from "./pages/settings/Settings";
 import Sidebar from "./components/sidebar/Sidebar";
 import Navbar from "./components/navbar/Navbar";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
+import { ref, onValue } from "firebase/database";
+import { signOut } from "firebase/auth";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
   const [user] = useAuthState(auth);
+  const [userTypeError, setUserTypeError] = useState(0);
 
-  //
   useEffect(() => {
     if (user == null) {
       localStorage.removeItem("gmail");
       setIsLoggedIn(false);
     } else {
-      const _user = JSON.parse(localStorage.getItem("gmail"));
-      console.log(_user);
-      setIsLoggedIn(true);
+      //checking the user type is match or not
+      const adminRef = ref(db, `admins/${user.uid}/type`);
+      onValue(adminRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userType = snapshot.val();
+          // Redirect based on user role
+          if (userType === "company") {
+            const _user = JSON.parse(localStorage.getItem("gmail"));
+            console.log(_user);
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+            console.log("User type isn't match!");
+            setUserTypeError(1);
+            signOut(auth);
+          }
+        }
+      });
     }
   }, [user]);
 
@@ -54,7 +71,7 @@ function App() {
                 <Route
                   path="/"
                   element={
-                    isLoggedIn ? <Navigate to={"admin/dashboard"} /> : <Login />
+                    isLoggedIn ? <Navigate to={"admin/dashboard"} /> : <Login userTypeError={userTypeError} />
                   }
                 />
                 <Route path="/admin">
