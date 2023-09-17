@@ -58,7 +58,7 @@ function Manage() {
       email: selectedLab.email,
     };
 
-    // Update the data in Firebase
+    // Update the data in Firebase realtime
     update(labRef, updates)
       .then(() => {
         // Data updated successfully
