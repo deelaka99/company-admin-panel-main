@@ -4,13 +4,14 @@ import { auth } from "../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Login = (props) => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [_user, setUser] = useState("");
+  const { userTypeError } = props;
 
   const signIn = (e) => {
     e.preventDefault();
@@ -20,7 +21,7 @@ const Login = () => {
         setUser(user);
         console.log(user);
         localStorage.setItem("gmail", true);
-        if(user) navigate("/admin/dashboard")
+        if (user) navigate("/admin/dashboard");
       })
       .catch((error) => {
         setError(true);
@@ -68,7 +69,8 @@ const Login = () => {
                   />
                   <br />
                   <div className="text-red font-bold p-3">
-                    {error && <span>Invalid Email or Password!</span>}
+                    {error && <span>Invalid Email or Password!</span> &&
+                    userTypeError === 1 ? <span>User type doesn't match!</span> : null}
                   </div>
                   <button
                     type="submit"

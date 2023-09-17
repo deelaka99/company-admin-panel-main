@@ -1,8 +1,9 @@
 import { React, useEffect, useState } from "react";
 import bcrypt from "bcryptjs";
-import { auth, db } from "../../firebase";
+import { auth, db, logout } from "../../firebase";
 import { uid } from "uid";
 import { set, ref, onValue } from "firebase/database";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 function AddNewLab() {
   const [showAddedSuccessModal, setShowAddedSuccessModal] = useState(false);
@@ -34,7 +35,7 @@ function AddNewLab() {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      const adminRef = ref(db,`admins/${user.uid}`);
+      const adminRef = ref(db, `admins/${user.uid}`);
       const unsubscribe = onValue(adminRef, (snapshot) => {
         if (snapshot.exists()) {
           const adminData = snapshot.val();
@@ -169,6 +170,7 @@ function AddNewLab() {
             province,
             email,
             amount,
+            type: "lab",
             blocked: false,
           });
 
@@ -184,6 +186,15 @@ function AddNewLab() {
           setAmount("");
 
           setShowAddedSuccessModal(true);
+
+          // create a lab admin
+          createUserWithEmailAndPassword(auth, email, password)
+            .then(() => {              
+              logout();
+            })
+            .catch((error) => {
+              console.error("Error creating lab admin:", error);
+            });
         });
       });
     }
@@ -373,7 +384,9 @@ function AddNewLab() {
                 </div>
               </div>
               <div className="h-1/5 w-full flex">
-                <div className="h-full w-2/6 flex items-center">Amount (Rs)</div>
+                <div className="h-full w-2/6 flex items-center">
+                  Amount (Rs)
+                </div>
                 <div className="h-full w-4/6 p-2">
                   <input
                     type="text"
