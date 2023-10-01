@@ -1,35 +1,65 @@
 import { React, useEffect, useState } from "react";
 import bcrypt from "bcryptjs";
-import { auth, db, logout } from "../../firebase";
+import { auth, db, logout, storage } from "../../firebase";
 import { set, ref, onValue } from "firebase/database";
+import { ref as ref1, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 function AddNewLab() {
+  const provinces = [
+    "Western",
+    "Central",
+    "Southern",
+    "Northern",
+    "Eastern",
+    "North_Western",
+    "North_Central",
+    "Uva",
+    "Sabaragamuwa",
+  ];
+
+  const provinceToDistricts = {
+    Western: ["Colombo", "Gampaha", "Kalutara"],
+    Central: ["Kandy", "Nuwara-Eliya", "Matale"],
+    Southern: ["Galle", "Matara", "Hambanthota"],
+    Northern: ["Jaffna", "Kilinochchi", "Mannar", "Mullaitivu", "Vavuniya"],
+    Eastern: ["Trincomalee", "Batticaloa", "Ampara"],
+    North_Western: ["Kurunegala", "Puttalam"],
+    North_Central: ["Anuradhapura", "Polonnaruwa"],
+    Uva: ["Badulla", "Monaragala"],
+    Sabaragamuwa: ["Ratnapura", "Kegalle"],
+  };
+
   const [showAddedSuccessModal, setShowAddedSuccessModal] = useState(false);
   const [showAddedUnsuccessModal, setShowAddedUnsuccessModal] = useState(false);
   //variable state
+  const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [LabName, setLabName] = useState("");
   const [district, setDistrict] = useState("Colombo");
   const [telephone, setTelephone] = useState("");
-  const [paymentDate, setPaymentDate] = useState("");
   const [password, setPassword] = useState("");
   const [address, setAddress] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [province, setProvince] = useState("Western");
   const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState("1500");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFilePath, setSelectedFilePath] = useState(null);
 
   //error states
   const [userNameError, setUserNameError] = useState("");
   const [labNameError, setLabNameError] = useState("");
   const [districtError, setDistrictError] = useState("");
   const [telephoneError, setTelephoneError] = useState("");
-  const [paymentDateError, setPaymentDateError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [addressError, setAddressError] = useState("");
   const [provinceError, setProvinceError] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [amountError, setAmountError] = useState("");
+  const [proPicError, setProPicError] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [proPicUploadError, setProPicUploadError] = useState("");
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -95,11 +125,6 @@ function AddNewLab() {
       isValid = false;
     }
 
-    if (!paymentDate) {
-      setPaymentDateError("Payment date is required");
-      isValid = false;
-    }
-
     if (!password) {
       setPasswordError("Password is required");
       isValid = false;
@@ -136,11 +161,26 @@ function AddNewLab() {
       isValid = false;
     }
 
-    if (!amount) {
-      setAmountError("Amount is required");
+    if (authError) {
       isValid = false;
-    } else if (!amountPattern.test(amount)) {
-      setAmountError("Invalid amount format. Please enter a valid amount.");
+    }
+
+    if (proPicError) {
+      isValid = false;
+    }
+
+    if (proPicUploadError) {
+      isValid = false;
+    }
+
+    if (!selectedFile) {
+      setProPicError("Please select an image");
+      isValid = false;
+    } else if (!selectedFile.type.startsWith("image/")) {
+      setProPicError("Please select a valid image file");
+      isValid = false;
+    } else if (selectedFile.size > 5 * 1024 * 1024) {
+      setProPicError("File size exceeds the maximum limit of 5MB");
       isValid = false;
     }
 
@@ -155,49 +195,84 @@ function AddNewLab() {
             return;
           }
 
-          // create a lab admin
+          // create a user
           createUserWithEmailAndPassword(auth, email, password)
             .then(() => {
               //writting data to the firebase
               const uid = auth.currentUser.uid;
-              set(ref(db, `labs/${uid}`), {
-                uid,
-                userName,
-                LabName,
-                district,
-                telephone,
-                paymentDate,
-                password: hashedPassword, //store the hashed password
-                address,
-                province,
-                email,
-                amount,
-                type: "lab",
-                blocked: false,
-              });
 
-              setUserName("");
-              setLabName("");
-              setDistrict("");
-              setTelephone("");
-              setPaymentDate("");
-              setPassword("");
-              setAddress("");
-              setProvince("");
-              setEmail("");
-              setAmount("");
+              try {
+                setLoading(true); // Set loading state to true
+                // Upload profile picture to Firebase Storage
+                const storageRef = ref1(storage, "profilePictures/" + uid);
+                uploadBytes(storageRef, selectedFile)
+                  .then(async () => {
+                    // Retrieve the download URL after the upload is complete
+                    const downloadURL = await getDownloadURL(storageRef);
+                    setProfilePicture(downloadURL);
 
-              setShowAddedSuccessModal(true);
-              // Delay the logout function call for 3 seconds
-              setTimeout(() => {
-                logout();
-              }, 3000); // 3000 milliseconds = 3 seconds
+                    set(ref(db, `labs/${uid}`), {
+                      uid,
+                      userName,
+                      LabName,
+                      district,
+                      telephone,
+                      password: hashedPassword, //store the hashed password
+                      address,
+                      province,
+                      email,
+                      type: "lab",
+                      blocked: false,
+                      profilePicture: downloadURL,
+                    });
+                    setLoading(false);
+                    setShowAddedSuccessModal(true);
+                    // Delay the logout function call for 3 seconds
+                    setTimeout(() => {
+                      logout();
+                    }, 3000); // 3000 milliseconds = 3 seconds
+                  })
+                  .catch((error) => {
+                    setLoading(false);
+                    setProPicUploadError(
+                      "Error occured when uploading Profile picture, Try again!"
+                    );
+                    setShowAddedUnsuccessModal(true);
+                    console.log("Error uploading Propic", error);
+                  })
+                  .finally(() => {
+                    setLoading(false);
+                  });
+              } catch (error) {
+                setShowAddedUnsuccessModal(true);
+                console.log("Error adding user", error);
+              }
             })
             .catch((error) => {
-              console.error("Error creating lab admin:", error);
+              // Handle the error based on the error code.
+              if (error.code === "auth/email-already-in-use") {
+                setEmailError("Email is already in use.");
+              } else {
+                setAuthError("Authentication Error! Please try again.");
+              }
+              setShowAddedUnsuccessModal(true);
+              console.error("Error creating the user:", error);
             });
         });
       });
+    }
+  };
+
+  //handle input image file
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setSelectedFile(file);
+      setSelectedFilePath(URL.createObjectURL(file));
+    } else {
+      setSelectedFile(null);
+      setSelectedFilePath(null);
     }
   };
 
@@ -205,10 +280,10 @@ function AddNewLab() {
     <div className="flex flex-col w-full h-full ">
       <div className="h-full w-full flex items-center justify-center">
         <div className="border-2 border-secondary-blue bg-primary-blue dark:bg-dark-primary dark:border-dark-ternary h-5/6 w-11/12 rounded-3xl flex flex-col">
-          <div className="h-4/5 w-full p-2 flex text-white">
+          <div className="h-3/5 w-full p-2 flex text-white">
             {/**first column */}
             <div className="w-1/2 h-full p-3">
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">User name</div>
                 <div className="h-full w-4/6 p-2">
                   <input
@@ -216,9 +291,9 @@ function AddNewLab() {
                     placeholder="Enter user name"
                     className={`${
                       userNameError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={userName}
                     onChange={(e) => {
                       setUserName(e.target.value);
@@ -227,7 +302,7 @@ function AddNewLab() {
                   />
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">Lab name</div>
                 <div className="h-full w-4/6 p-2">
                   <input
@@ -235,9 +310,9 @@ function AddNewLab() {
                     placeholder="Enter Lab name"
                     className={`${
                       labNameError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={LabName}
                     onChange={(e) => {
                       setLabName(e.target.value);
@@ -246,26 +321,34 @@ function AddNewLab() {
                   />
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">District</div>
                 <div className="h-full w-4/6 p-2">
-                  <input
-                    type="text"
-                    placeholder="Enter district"
+                  <select
                     className={`${
                       districtError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={district}
                     onChange={(e) => {
                       setDistrict(e.target.value);
                       setDistrictError("");
                     }}
-                  />
+                  >
+                    {provinceToDistricts[province].map((district) => (
+                      <option
+                        className="text-primary-blue dark:text-gray1"
+                        key={district}
+                        value={district}
+                      >
+                        {district}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">Telephone</div>
                 <div className="h-full w-4/6 p-2">
                   <input
@@ -273,9 +356,9 @@ function AddNewLab() {
                     placeholder="Enter telephone number"
                     className={`${
                       telephoneError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={telephone}
                     onChange={(e) => {
                       setTelephone(e.target.value);
@@ -284,31 +367,10 @@ function AddNewLab() {
                   />
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
-                <div className="h-full w-2/6 flex items-center">
-                  Payment date
-                </div>
-                <div className="h-full w-4/6 p-2">
-                  <input
-                    type="date"
-                    placeholder="Enter payment date as MM-dd-YYYY"
-                    className={`${
-                      paymentDateError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
-                    value={paymentDate}
-                    onChange={(e) => {
-                      setPaymentDate(e.target.value);
-                      setPaymentDateError("");
-                    }}
-                  />
-                </div>
-              </div>
             </div>
             {/**Second column */}
             <div className="w-1/2 h-full p-3">
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">Password</div>
                 <div className="h-full w-4/6 p-2">
                   <input
@@ -316,9 +378,9 @@ function AddNewLab() {
                     placeholder="Enter password"
                     className={`${
                       passwordError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -327,7 +389,7 @@ function AddNewLab() {
                   />
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">Address</div>
                 <div className="h-full w-4/6 p-2">
                   <input
@@ -335,9 +397,9 @@ function AddNewLab() {
                     placeholder="Enter address"
                     className={`${
                       addressError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={address}
                     onChange={(e) => {
                       setAddress(e.target.value);
@@ -346,26 +408,35 @@ function AddNewLab() {
                   />
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">Province</div>
                 <div className="h-full w-4/6 p-2">
-                  <input
-                    type="text"
-                    placeholder="Enter province"
+                  <select
                     className={`${
                       provinceError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold`}
                     value={province}
                     onChange={(e) => {
                       setProvince(e.target.value);
+                      setDistrict(provinceToDistricts[e.target.value][0]);
                       setProvinceError("");
                     }}
-                  />
+                  >
+                    {provinces.map((p) => (
+                      <option
+                        className="text-primary-blue dark:text-gray1"
+                        key={p}
+                        value={p}
+                      >
+                        {p}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
+              <div className="h-1/4 w-full flex">
                 <div className="h-full w-2/6 flex items-center">Email</div>
                 <div className="h-full w-4/6 p-2">
                   <input
@@ -373,9 +444,9 @@ function AddNewLab() {
                     placeholder="Enter email"
                     className={`${
                       emailError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
+                        ? "bg-ternary-blue bg-opacity-30 border-white dark:border-gray2 dark:bg-dark-ternary"
+                        : "border-white bg-red-2 text-white"
+                    } w-full h-full rounded-full text-white dark:text-gray1 border-secondary-blue border-2 pl-3 font-semibold placeholder:text-white placeholder:font-light dark:placeholder:text-gray1`}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -384,28 +455,42 @@ function AddNewLab() {
                   />
                 </div>
               </div>
-              <div className="h-1/5 w-full flex">
-                <div className="h-full w-2/6 flex items-center">
-                  Amount (Rs)
-                </div>
-                <div className="h-full w-4/6 p-2">
-                  <input
-                    type="text"
-                    placeholder="Enter amount"
-                    className={`${
-                      amountError === ""
-                        ? "border-secondary-blue bg-white"
-                        : "border-white bg-red-2 text-white dark:text-white"
-                    } w-full h-full rounded-full text-primary-blue dark:text-black border-secondary-blue border-2 p-3 font-medium text-lg`}
-                    value={amount}
-                    onChange={(e) => {
-                      setAmount(e.target.value);
-                      setAmountError("");
-                    }}
-                  />
-                </div>
-              </div>
             </div>
+          </div>
+          <div className="flex items-center justify-center h-1/5 w-full">
+            <label className="relative cursor-pointer bg-ternary-blue text-primary-blue text-md font-lg font-inter py-3 px-5 rounded-full shadow-md hover:bg-white hover:shadow-xl dark:bg-dark-secondary dark:border-2 dark:border-dark-ternary dark:text-ternary-blue">
+              <span>
+                {selectedFile ? (
+                  <div className="flex h-full w-full">
+                    <div className="flex items-center justify-center">
+                      <img
+                        src={selectedFilePath}
+                        alt="Selected"
+                        className="w-10 h-10 rounded-full shadow-sm shadow-dark-primary"
+                      />
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <span>
+                        &nbsp;&nbsp;&nbsp;Change Profile
+                        Picture&nbsp;&nbsp;&nbsp;
+                        <FontAwesomeIcon icon={faCaretDown} />
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <span>
+                    Select Profile Picture&nbsp;&nbsp;&nbsp;
+                    <FontAwesomeIcon icon={faCaretDown} />
+                  </span>
+                )}
+              </span>
+              <input
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                onChange={handleFileChange}
+                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </label>
           </div>
           <div className="h-1/5 w-full flex">
             <div className="h-full w-3/5 p-2"></div>
@@ -497,11 +582,6 @@ function AddNewLab() {
                       - {telephoneError} -
                     </p>
                   )}
-                  {paymentDateError && (
-                    <p className="h-1/6 pt-1 text-xs text-center text-white">
-                      - {paymentDateError} -
-                    </p>
-                  )}
                   {passwordError && (
                     <p className="h-1/6 pt-1 text-xs text-center text-white">
                       - {passwordError} -
@@ -522,9 +602,19 @@ function AddNewLab() {
                       - {emailError} -
                     </p>
                   )}
-                  {amountError && (
+                  {proPicError && (
                     <p className="h-1/6 pt-1 text-xs text-center text-white">
-                      - {amountError} -
+                      - {proPicError} -
+                    </p>
+                  )}
+                  {authError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {authError} -
+                    </p>
+                  )}
+                  {proPicUploadError && (
+                    <p className="h-1/6 pt-1 text-xs text-center text-white">
+                      - {proPicUploadError} -
                     </p>
                   )}
                 </div>
@@ -534,6 +624,15 @@ function AddNewLab() {
           </div>
           <div className="rounded-lg opacity-50 fixed inset-0 z-40 bg-black"></div>
         </div>
+      ) : null}
+
+      {loading ? (
+        <>
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none text-primary-blue dark:text-white">
+            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary-blue dark:border-white"></div>
+          </div>
+          <div className="opacity-50 fixed inset-0 z-40 bg-black"></div>
+        </>
       ) : null}
     </div>
   );
