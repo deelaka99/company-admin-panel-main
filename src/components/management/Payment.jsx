@@ -14,19 +14,35 @@ import DownloadBtn from "../tables/sampleTable/DownloadBtn";
 import DebouncedInput from "../tables/sampleTable/DebouncedInput";
 
 function Payment() {
-  const currentLabOpUID = auth.currentUser.uid;
-  const [companyPaymentData, setCompanyPaymentData] = useState([]);
+  const [labPaymentData, setLabPaymentData] = useState([]);
 
   // useEffect hook to fetch data from Firebase
   useEffect(() => {
-    const comPayRef = ref(db, `payments/labPayments/${currentLabOpUID}`);
-    onValue(comPayRef, (snapshot) => {
-      const comPayData = [];
+    const labsRef = ref(db, "labs");
+    const labsData = [];
+  
+    onValue(labsRef, (snapshot) => {
       snapshot.forEach((childSnapshot) => {
-        const comPay = childSnapshot.val();
-        comPayData.push(comPay);
+        const lab = childSnapshot.val();
+        const labUid = lab.uid;
+  
+        if (labUid) {
+          const labPayRef = ref(db, `payments/labPayments/${labUid}`);
+          onValue(labPayRef, (snapshot) => {
+            const labPayData = [];
+            snapshot.forEach((childSnapshot) => {
+              const labPay = childSnapshot.val();
+              labPayData.push(labPay);
+            });
+  
+            // Accumulate payment data for this lab
+            labsData.push(...labPayData);
+          });
+        }
       });
-      setCompanyPaymentData(comPayData);
+  
+      // Set the accumulated payment data for all labs
+      setLabPaymentData(labsData);
     });
   }, []);
 
@@ -37,6 +53,10 @@ function Payment() {
       id: "No",
       cell: (info) => <span>{info.row.index + 1}</span>,
       header: "No",
+    }),
+    columnHelper.accessor("operatorName", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Lab Name",
     }),
     columnHelper.accessor("paymentMethod", {
       cell: (info) => <span>{info.getValue()}</span>,
@@ -62,7 +82,7 @@ function Payment() {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
-    data: companyPaymentData,
+    data: labPaymentData,
     columns,
     state: {
       globalFilter,
@@ -84,10 +104,7 @@ function Payment() {
             />
           </div>
           <div className="flex items-center justify-end h-full w-1/2 p-3">
-            <DownloadBtn
-              data={companyPaymentData}
-              fileName={"companyPayments"}
-            />
+            <DownloadBtn data={labPaymentData} fileName={"labsPayments"} />
             <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
           </div>
         </div>
