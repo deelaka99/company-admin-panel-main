@@ -45,7 +45,7 @@ const Navbar = () => {
       <div className="h-full w-2/5 flex">
         {/**Dark mode button */}
         <div className=" h-full w-1/5 flex justify-center items-center">
-          <div className="bg-bermuda dark:bg-dark-secondary rounded-full h-1/2 w-1/2 flex items-center justify-center">
+          <div className="bg-bermuda dark:bg-dark-secondary rounded-full h-[30px] w-[30px]  sm:h-[37px] sm:w-[37px] md:h-[41px] md:w-[41px] lg:h-[45px] lg:w-[45px] flex items-center justify-center">
             <Switcher />
           </div>
         </div>
