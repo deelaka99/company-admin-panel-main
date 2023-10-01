@@ -1,7 +1,6 @@
 import { React, useEffect, useState } from "react";
 import bcrypt from "bcryptjs";
 import { auth, db, logout } from "../../firebase";
-import { uid } from "uid";
 import { set, ref, onValue } from "firebase/database";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
@@ -156,41 +155,43 @@ function AddNewLab() {
             return;
           }
 
-          //writting data to the firebase
-          const uuid = uid();
-          set(ref(db, `labs/${uuid}`), {
-            uuid,
-            userName,
-            LabName,
-            district,
-            telephone,
-            paymentDate,
-            password: hashedPassword, //store the hashed password
-            address,
-            province,
-            email,
-            amount,
-            type: "lab",
-            blocked: false,
-          });
-
-          setUserName("");
-          setLabName("");
-          setDistrict("");
-          setTelephone("");
-          setPaymentDate("");
-          setPassword("");
-          setAddress("");
-          setProvince("");
-          setEmail("");
-          setAmount("");
-
-          setShowAddedSuccessModal(true);
-
           // create a lab admin
           createUserWithEmailAndPassword(auth, email, password)
-            .then(() => {              
-              logout();
+            .then(() => {
+              //writting data to the firebase
+              const uid = auth.currentUser.uid;
+              set(ref(db, `labs/${uid}`), {
+                uid,
+                userName,
+                LabName,
+                district,
+                telephone,
+                paymentDate,
+                password: hashedPassword, //store the hashed password
+                address,
+                province,
+                email,
+                amount,
+                type: "lab",
+                blocked: false,
+              });
+
+              setUserName("");
+              setLabName("");
+              setDistrict("");
+              setTelephone("");
+              setPaymentDate("");
+              setPassword("");
+              setAddress("");
+              setProvince("");
+              setEmail("");
+              setAmount("");
+
+              setShowAddedSuccessModal(true);
+              // Delay the logout function call for 3 seconds
+              setTimeout(() => {
+                logout();
+              }, 3000); // 3000 milliseconds = 3 seconds
             })
             .catch((error) => {
               console.error("Error creating lab admin:", error);

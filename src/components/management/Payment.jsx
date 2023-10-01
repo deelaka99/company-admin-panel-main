@@ -1,191 +1,174 @@
-import React from "react";
-import visa from "../../assets/images/visa.png";
-import mastercard from "../../assets/images/mastercard.png";
+import React, { useEffect, useState } from "react";
+import { auth, db } from "../../firebase";
+import { ref, onValue } from "firebase/database";
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import CompanyPaymentTable from "../tables/CompanyPaymentTable";
+import DownloadBtn from "../tables/sampleTable/DownloadBtn";
+import DebouncedInput from "../tables/sampleTable/DebouncedInput";
 
 function Payment() {
+  const [labPaymentData, setLabPaymentData] = useState([]);
+
+  // useEffect hook to fetch data from Firebase
+  useEffect(() => {
+    const labsRef = ref(db, "labs");
+    const labsData = [];
+  
+    onValue(labsRef, (snapshot) => {
+      snapshot.forEach((childSnapshot) => {
+        const lab = childSnapshot.val();
+        const labUid = lab.uid;
+  
+        if (labUid) {
+          const labPayRef = ref(db, `payments/labPayments/${labUid}`);
+          onValue(labPayRef, (snapshot) => {
+            const labPayData = [];
+            snapshot.forEach((childSnapshot) => {
+              const labPay = childSnapshot.val();
+              labPayData.push(labPay);
+            });
+  
+            // Accumulate payment data for this lab
+            labsData.push(...labPayData);
+          });
+        }
+      });
+  
+      // Set the accumulated payment data for all labs
+      setLabPaymentData(labsData);
+    });
+  }, []);
+
+  const columnHelper = createColumnHelper();
+
+  const columns = [
+    columnHelper.accessor("", {
+      id: "No",
+      cell: (info) => <span>{info.row.index + 1}</span>,
+      header: "No",
+    }),
+    columnHelper.accessor("operatorName", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Lab Name",
+    }),
+    columnHelper.accessor("paymentMethod", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Payment Method",
+    }),
+    columnHelper.accessor("month", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Payment Month",
+    }),
+    columnHelper.accessor("paymentDate", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Payment Date",
+    }),
+    columnHelper.accessor("paymentTime", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Payment Time",
+    }),
+    columnHelper.accessor("amount", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Amount (Rs.)",
+    }),
+  ];
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const table = useReactTable({
+    data: labPaymentData,
+    columns,
+    state: {
+      globalFilter,
+    },
+    getFilteredRowModel: getFilteredRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="h-full w-full flex items-center justify-center">
-        <div className=" h-5/6 w-11/12">
-          <div className="h-full w-full overflow-hidden">
-            <div className="w-full h-full pt-3 flex items-center justify-center overflow-y-auto">
-              <div className="w-full  rounded-md">
-                <table className="bg-ternary-blue dark:bg-dark-ternary p-3 h-full w-full ">
-                  <thead className="">
-                    <tr className="bg-secondary-blue dark:bg-dark-secondary">
-                      <th className="p-1">Lab ID</th>
-                      <th className="p-1">Name</th>
-                      <th className="p-1">Address</th>
-                      <th className="p-1">Contact</th>
-                      <th className="p-1">Status</th>
-                      <th className="p-1">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="">
-                    <tr className="text-center">
-                      <td>001</td>
-                      <td>A</td>
-                      <td>Galle</td>
-                      <td>07713377130</td>
-                      <td>Active</td>
-                      <td>
-                        <div className="flex items-center justify-center">
-                          <div className="w-1/3">
-                            <button className="bg-blue text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Update
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-red text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Remove
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-yellow text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Block
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr className="text-center">
-                      <td>001</td>
-                      <td>A</td>
-                      <td>Galle</td>
-                      <td>07713377130</td>
-                      <td>Active</td>
-                      <td>
-                        <div className="flex items-center justify-center">
-                          <div className="w-1/3">
-                            <button className="bg-blue text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Update
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-red text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Remove
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-yellow text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Block
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr className="text-center">
-                      <td>001</td>
-                      <td>A</td>
-                      <td>Galle</td>
-                      <td>07713377130</td>
-                      <td>Active</td>
-                      <td>
-                        <div className="flex items-center justify-center">
-                          <div className="w-1/3">
-                            <button className="bg-blue text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Update
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-red text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Remove
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-yellow text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Block
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr className="text-center">
-                      <td>001</td>
-                      <td>A</td>
-                      <td>Galle</td>
-                      <td>07713377130</td>
-                      <td>Active</td>
-                      <td>
-                        <div className="flex items-center justify-center">
-                          <div className="w-1/3">
-                            <button className="bg-blue text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Update
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-red text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Remove
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-yellow text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Block
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr className="text-center">
-                      <td>001</td>
-                      <td>A</td>
-                      <td>Galle</td>
-                      <td>07713377130</td>
-                      <td>Active</td>
-                      <td>
-                        <div className="flex items-center justify-center">
-                          <div className="w-1/3">
-                            <button className="bg-blue text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Update
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-red text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Remove
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-yellow text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Block
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr className="text-center">
-                      <td>001</td>
-                      <td>A</td>
-                      <td>Galle</td>
-                      <td>07713377130</td>
-                      <td>Active</td>
-                      <td>
-                        <div className="flex items-center justify-center">
-                          <div className="w-1/3">
-                            <button className="bg-blue text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Update
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-red text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Remove
-                            </button>
-                          </div>
-                          <div className="w-1/3">
-                            <button className="bg-yellow text-center p-1 text-white rounded-md hover:opacity-70 h-full">
-                              Block
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+    <>
+      <div className="flex flex-col w-full h-full">
+        <div className="flex items-center w-full h-1/6 border-b border-ternary-blue dark:border-dark-ternary">
+          <div className="flex justify-start items-center h-full w-1/2 p-3">
+            <DebouncedInput
+              value={globalFilter ?? ""}
+              onChange={(value) => setGlobalFilter(String(value))}
+              placeholder="Search all columns..."
+            />
+          </div>
+          <div className="flex items-center justify-end h-full w-1/2 p-3">
+            <DownloadBtn data={labPaymentData} fileName={"labsPayments"} />
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center w-full h-4/6 max-h-[450px] overflow-y-auto p-3 rounded">
+          <CompanyPaymentTable tableName={table} />
+        </div>
+        <div className="flex items-center justify-center w-full h-1/6 p-3 border-t border-ternary-blue dark:border-dark-ternary">
+          {/* pagination */}
+          <div className="flex items-center justify-end mt-2 gap-2 text-ternary-blue dark:text-gray2">
+            <button
+              onClick={() => {
+                table.previousPage();
+              }}
+              disabled={!table.getCanPreviousPage()}
+              className="p-1 border border-gray-300 px-2 disabled:opacity-30"
+            >
+              {"<"}
+            </button>
+            <button
+              onClick={() => {
+                table.nextPage();
+              }}
+              disabled={!table.getCanNextPage()}
+              className="p-1 border border-gray-300 px-2 disabled:opacity-30"
+            >
+              {">"}
+            </button>
+
+            <span className="flex items-center gap-1">
+              <div>Page</div>
+              <strong>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </strong>
+            </span>
+            <span className="flex items-center gap-1">
+              | Go to page:
+              <input
+                type="number"
+                defaultValue={table.getState().pagination.pageIndex + 1}
+                onChange={(e) => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0;
+                  table.setPageIndex(page);
+                }}
+                className="border p-1 rounded w-16 bg-transparent"
+              />
+            </span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value));
+              }}
+              className="p-2 bg-transparent"
+            >
+              {[10, 20, 30, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
