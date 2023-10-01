@@ -89,8 +89,7 @@ const Profile = () => {
       await uploadBytes(storageRef, selectedProfilePicture);
 
       // Retrieve the download URL using a new reference
-      const downloadURLRef = ref1(storage, "profilePictures/" + user.uid);
-      const downloadURL = await getDownloadURL(downloadURLRef);
+      const downloadURL = await getDownloadURL(storageRef);
 
       // Update admin details to include profile picture URL
       const adminDetails = { ...adminData };
