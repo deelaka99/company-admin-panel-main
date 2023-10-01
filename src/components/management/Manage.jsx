@@ -1,15 +1,27 @@
 import { React, useState, useEffect } from "react";
-import { db } from "../../firebase";
+import { db, storage } from "../../firebase";
 import { update, remove, ref, onValue } from "firebase/database";
+import { ref as storageRef, deleteObject } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import NotificationModal from "../Modal/NotificationModal";
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import LabManageTable from "../tables/LabManageTable";
+import DownloadBtn from "../tables/sampleTable/DownloadBtn";
+import DebouncedInput from "../tables/sampleTable/DebouncedInput";
 
 function Manage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [labsData, setLabsData] = useState([]); // State to store retrieved data
   const [selectedLab, setSelectedLab] = useState({
-    uuid: "",
+    uid: "",
     LabName: "",
     address: "",
     amount: "",
@@ -19,6 +31,7 @@ function Manage() {
     paymentDate: "",
     province: "",
     telephone: "",
+    profilePicture: "",
   });
 
   const [showLabUpdateSuccessModal, setShowLabUpdateSuccessModal] =
@@ -29,9 +42,6 @@ function Manage() {
     useState(false);
   const [showLabRemoveUnsuccessModal, setShowLabRemoveUnsuccessModal] =
     useState(false);
-  const [blockedStatus, setBlockedStatus] = useState(
-    labsData.map(() => false) // Initialize with all labs as unblocked
-  );
   const [showLabBlockedModal, setShowLabBlockedModal] = useState(false);
   const [showLabUnblockedModal, setShowLabUnblockedModal] = useState(false);
 
@@ -50,7 +60,7 @@ function Manage() {
 
   // Lab update function
   const updateLabData = () => {
-    const labRef = ref(db, `labs/${selectedLab.uuid}`); // Assuming you have an "id" property in your lab object
+    const labRef = ref(db, `labs/${selectedLab.uid}`);
     const updates = {
       LabName: selectedLab.LabName,
       address: selectedLab.address,
@@ -72,115 +82,209 @@ function Manage() {
       });
   };
 
-  //Remove a lab
-  const removeLab = (slectedLab) => {
-    console.log("selectedLab:", slectedLab); // Check the selectedLab object
+  //Function to hadle remove button
+  const handleRemoveClick = (lab) => {
+    const labRef = ref(db, "labs/" + lab.uid);
+    const imagePath = lab.profilePicture;
+    const imageRef = storageRef(storage, imagePath);
 
-    const labRef = ref(db, "labs/" + slectedLab);
+    // Remove the user's profile picture from Firebase Storage
+    deleteObject(imageRef)
+      .then(() => {
+        // Image deleted successfully from Firebase Storage
+        console.log(lab.LabName, "'s proPic deleted from Firebase Storage");
+      })
+      .catch((error) => {
+        console.error("Error deleting proPic from Firebase Storage:", error);
+      });
 
-    // Remove the lab from Firebase
+    // Remove the user from Firebase database
     remove(labRef)
       .then(() => {
         setShowLabRemoveSuccessModal(true);
       })
       .catch((error) => {
-        console.error("Error removing lab:", error);
+        console.error("Error removing Lab:", error);
         setShowLabRemoveUnsuccessModal(true);
       });
   };
 
-  const handleToggleBlock = (index) => {
-    const selectedLab = labsData[index]; // Get the selected lab data
-    const labRef = ref(db, `labs/${selectedLab.uuid}`);
-  
+  // Function to handle edit button
+  const handleEditClick = (lab) => {
+    setSelectedLab(lab);
+    setShowEditModal(true);
+  };
+
+  const handleToggleBlock = (lab) => {
+    const labRef = ref(db, `labs/${lab.uid}`);
+
     // Update the blocked status of the lab in Firebase
-    const updatedBlockedStatus = !selectedLab.blocked;
+    const updatedBlockedStatus = !lab.blocked;
     const updates = {
       blocked: updatedBlockedStatus,
     };
-  
+
     // Update the data in Firebase
     update(labRef, updates)
       .then(() => {
         // Data updated successfully
-        console.log("Lab blocked/unblocked!");
+        updatedBlockedStatus
+          ? setShowLabBlockedModal(true)
+          : setShowLabUnblockedModal(true);
       })
       .catch((error) => {
         console.error("Error blocking lab:", error);
       });
-  
-    const updatedLabsData = [...labsData]; // Create a copy of the labsData array
-    updatedLabsData[index].blocked = updatedBlockedStatus; // Update the blocked status in the copied array
-    setLabsData(updatedLabsData); // Update the labsData state
   };
 
-  return (
-    <div className="flex flex-col w-full h-full">
-      <div className="h-full w-full flex items-center justify-center">
-        <div className="h-5/6 w-11/12 overflow-hidden">
-          <div className="relative w-full h-full overflow-y-auto overflow-x-auto  shadow-md rounded-lg">
-            <table className="w-full text-sm text-center  text-primary-blue dark:text-white">
-              <thead className="text-xs text-white  uppercase bg-secondary-blue dark:bg-black dark:text-dark-ternary">
-                <tr>
-                  <th scope="col" className="px-6 py-3">
-                    Lab Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Address
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Telephone
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Email
-                  </th>
+  const columnHelper = createColumnHelper();
 
-                  <th scope="col" className="px-6 py-3">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-ternary-blue dark:bg-dark-ternary overflow-y-auto">
-                {labsData.map((lab, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-6 py-4">{lab.LabName}</td>
-                    <td className="px-6 py-4">{lab.address}</td>
-                    <td className="px-6 py-4">{lab.telephone}</td>
-                    <td className="px-6 py-4">{lab.email}</td>
-                    <td className="px-6 py-4 space-x-2 flex">
-                      <button
-                        className="bg-blue text-white p-1 rounded shadow-lg hover:opacity-80"
-                        onClick={() => {
-                          setSelectedLab(lab);
-                          setShowEditModal(true);
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className={`${
-                          lab.blocked ? "bg-green text-white" : "bg-yellow"
-                        } text-black p-1 rounded shadow-lg hover:opacity-80`}
-                        onClick={() => {
-                          handleToggleBlock(index);
-                          lab.blocked? setShowLabBlockedModal(true): setShowLabUnblockedModal(true);
-                        }}
-                      >
-                        {lab.blocked ? "Unblock" : "Block"}
-                      </button>
-                      <button
-                        className="bg-red text-white p-1 rounded shadow-lg hover:opacity-80"
-                        onClick={() => {
-                          removeLab(lab.uuid);
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+  const columns = [
+    columnHelper.accessor("", {
+      id: "No",
+      cell: (info) => <span>{info.row.index + 1}</span>,
+      header: "No",
+    }),
+    columnHelper.accessor("profilePicture", {
+      cell: (info) => (
+        <img
+          src={info?.getValue()}
+          alt="proPic"
+          className="rounded-full border w-10 h-10 object-cover"
+        />
+      ),
+      header: "Profile Pic",
+    }),
+    columnHelper.accessor("LabName", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Lab Name",
+    }),
+    columnHelper.accessor("address", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Address",
+    }),
+    columnHelper.accessor("telephone", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "Telephone",
+    }),
+    columnHelper.accessor("email", {
+      cell: (info) => <span>{info.getValue()}</span>,
+      header: "E-mail",
+    }),
+    columnHelper.accessor("", {
+      header: "Action",
+      cell: (info) => (
+        <div className="flex items-center">
+          <button
+            className="bg-blue text-white active:bg-black font-semibold uppercase text-sm px-3 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+            onClick={() => handleEditClick(info.row.original)}
+          >
+            Edit
+          </button>
+          <button
+            className={`bg-${
+              info.row.original.blocked ? "green" : "yellow"
+            } text-white active:bg-black font-semibold uppercase text-sm px-3 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150`}
+            onClick={() => handleToggleBlock(info.row.original)}
+          >
+            {info.row.original.blocked ? "Unblock" : "Block"}
+          </button>
+          <button
+            className="bg-red-2 text-white active:bg-black font-semibold uppercase text-sm px-3 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+            onClick={() => handleRemoveClick(info.row.original)}
+          >
+            Remove
+          </button>
+        </div>
+      ),
+    }),
+  ];
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const table = useReactTable({
+    data: labsData,
+    columns,
+    state: {
+      globalFilter,
+    },
+    getFilteredRowModel: getFilteredRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+  return (
+    <>
+      <div className="flex flex-col w-full h-full">
+        <div className="flex items-center w-full h-1/6 border-b border-ternary-blue dark:border-dark-ternary">
+          <div className="flex justify-start items-center h-full w-1/2 p-3">
+            <DebouncedInput
+              value={globalFilter ?? ""}
+              onChange={(value) => setGlobalFilter(String(value))}
+              placeholder="Search all columns..."
+            />
+          </div>
+          <div className="flex items-center justify-end h-full w-1/2 p-3">
+            <DownloadBtn data={labsData} fileName={"labs"} />
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center w-full h-4/6 max-h-[450px] overflow-y-auto p-3 rounded">
+          <LabManageTable tableName={table} />
+        </div>
+        <div className="flex items-center justify-center w-full h-1/6 p-3 border-t border-ternary-blue dark:border-dark-ternary">
+          {/* pagination */}
+          <div className="flex items-center justify-end mt-2 gap-2 text-ternary-blue dark:text-gray2">
+            <button
+              onClick={() => {
+                table.previousPage();
+              }}
+              disabled={!table.getCanPreviousPage()}
+              className="p-1 border border-gray-300 px-2 disabled:opacity-30"
+            >
+              {"<"}
+            </button>
+            <button
+              onClick={() => {
+                table.nextPage();
+              }}
+              disabled={!table.getCanNextPage()}
+              className="p-1 border border-gray-300 px-2 disabled:opacity-30"
+            >
+              {">"}
+            </button>
+
+            <span className="flex items-center gap-1">
+              <div>Page</div>
+              <strong>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </strong>
+            </span>
+            <span className="flex items-center gap-1">
+              | Go to page:
+              <input
+                type="number"
+                defaultValue={table.getState().pagination.pageIndex + 1}
+                onChange={(e) => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0;
+                  table.setPageIndex(page);
+                }}
+                className="border p-1 rounded w-16 bg-transparent"
+              />
+            </span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value));
+              }}
+              className="p-2 bg-transparent"
+            >
+              {[10, 20, 30, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
@@ -380,7 +484,7 @@ function Manage() {
           color="green"
         />
       ) : null}
-    </div>
+    </>
   );
 }
 export default Manage;
