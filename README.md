@@ -2,6 +2,9 @@
 # Company-Admin-Panel
 
 Created Using ReactJS with Tailwind CSS
+
+##Login details:
+
 Email: 123dinujaya@gmail.com; pw: 12345678
 
 ## Main Project
